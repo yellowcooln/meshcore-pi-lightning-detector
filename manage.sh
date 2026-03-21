@@ -61,6 +61,16 @@ ensure_config() {
   fi
 }
 
+report_i2c_status() {
+  if [[ -e /dev/i2c-1 ]]; then
+    echo "Detected /dev/i2c-1. Raspberry Pi I2C appears to be enabled."
+  else
+    echo "I2C bus /dev/i2c-1 was not found."
+    echo "If this is a Raspberry Pi, enable I2C with: sudo raspi-config"
+    echo "Then reboot and re-run this script."
+  fi
+}
+
 install_service_file() {
   ensure_root_tools
   sudo tee "${SERVICE_PATH}" >/dev/null <<EOF
@@ -91,11 +101,12 @@ install_app() {
   ensure_python_env
   ensure_config
   install_service_file
+  report_i2c_status
   echo
   echo "Install complete."
   echo "Next steps:"
   echo "  1. Edit ${CONFIG_PATH}"
-  echo "  2. Enable I2C on the Pi if you have not already"
+  echo "  2. If /dev/i2c-1 is missing, enable I2C on the Pi and reboot"
   echo "  3. Run: ./manage.sh start"
 }
 

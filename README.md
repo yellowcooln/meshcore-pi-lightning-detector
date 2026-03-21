@@ -52,7 +52,15 @@ python -m unittest discover -s tests -v
 
 ## Raspberry Pi Setup
 
-Enable I2C first:
+Check whether I2C is already enabled before changing anything:
+
+```bash
+ls /dev/i2c-1
+```
+
+If `/dev/i2c-1` exists, I2C is already enabled and you do not need to run `raspi-config`.
+
+If `/dev/i2c-1` is missing, enable I2C and reboot:
 
 ```bash
 sudo raspi-config
