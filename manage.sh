@@ -26,6 +26,7 @@ Commands:
   stop       Stop the systemd service
   restart    Restart the systemd service
   status     Show systemd service status
+  test       Run a one-shot MeshCore verify/probe using the project virtualenv
   logs       Tail service logs
   uninstall  Stop and remove the systemd service
 EOF
@@ -118,6 +119,20 @@ ensure_config() {
     echo "Created ${CONFIG_PATH} from example. Edit it before starting the service."
   else
     info "Using existing config at ${CONFIG_PATH}"
+  fi
+}
+
+ensure_runtime_ready() {
+  if [[ ! -x "${VENV_PATH}/bin/meshcore-lightning" ]]; then
+    echo "The project virtual environment is not ready at ${VENV_PATH}." >&2
+    echo "Run ./manage.sh install first." >&2
+    exit 1
+  fi
+
+  if [[ ! -f "${CONFIG_PATH}" ]]; then
+    echo "Missing ${CONFIG_PATH}." >&2
+    echo "Run ./manage.sh install first." >&2
+    exit 1
   fi
 }
 
@@ -367,6 +382,14 @@ logs_service() {
   sudo journalctl -u "${SERVICE_NAME}" -n 100 -f
 }
 
+test_runtime() {
+  stage "Running one-shot MeshCore probe"
+  ensure_runtime_ready
+  info "Using ${CONFIG_PATH}"
+  info "Running verify-channel --send-probe from the project virtual environment"
+  run_as_owner "${VENV_PATH}/bin/meshcore-lightning" --config "${CONFIG_PATH}" verify-channel --send-probe
+}
+
 uninstall_service() {
   stage "Removing systemd service"
   ensure_root_tools
@@ -415,6 +438,9 @@ main() {
       ;;
     status)
       status_service
+      ;;
+    test)
+      test_runtime
       ;;
     logs)
       logs_service

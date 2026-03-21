@@ -145,6 +145,7 @@ After install, start the service:
 ```bash
 sudo ./manage.sh start
 sudo ./manage.sh status
+sudo ./manage.sh test
 sudo ./manage.sh logs
 ```
 
@@ -153,6 +154,7 @@ Other service commands:
 ```bash
 sudo ./manage.sh stop
 sudo ./manage.sh restart
+sudo ./manage.sh test
 sudo ./manage.sh uninstall
 ```
 
@@ -171,6 +173,12 @@ Verify that the configured channel can be loaded, even if it is not already on t
 ```bash
 meshcore-lightning verify-channel --send-probe
 meshcore-lightning --channel-name "#temporary-check" verify-channel --send-probe
+```
+
+Run the same probe through the project-managed virtualenv without activating `.venv`:
+
+```bash
+sudo ./manage.sh test
 ```
 
 Run the monitor interactively:
