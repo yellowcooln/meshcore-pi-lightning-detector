@@ -46,122 +46,23 @@ If your breakout exposes Qwiic / STEMMA QT, it should plug into that PiMesh-1W `
 - `app/as3935.py`: I2C register reads/writes and event parsing
 - `app/meshcore_client.py`: MeshCore TCP connect, channel configure, and send logic
 - `app/config.py`: TOML config loading and validation
+- `HOWTO.md`: start-to-finish deployment guide for the current stack
 - `manage.sh`: install and service lifecycle management
 - `config.example.toml`: deployment template
 - `tests/`: unit tests
 
-## Main Setup
+## Setup Guide
 
-```bash
-git clone https://github.com/yellowcooln/meshcore-pi-lightning-detector.git
-cd meshcore-pi-lightning-detector
-```
+For the full current-stack deployment guide, read [HOWTO.md](HOWTO.md).
 
-## Raspberry Pi Setup
+That guide covers:
 
-Check whether I2C is already enabled before changing anything:
-
-```bash
-ls /dev/i2c-1
-```
-
-If `/dev/i2c-1` exists, I2C is already enabled and you do not need to run `raspi-config`.
-
-If `/dev/i2c-1` is missing, enable I2C and reboot:
-
-```bash
-sudo raspi-config
-# Interface Options -> I2C -> Enable
-sudo reboot
-```
-
-Install prerequisites:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y python3-venv python3-pip i2c-tools
-```
-
-Confirm the bus and sensor:
-
-```bash
-ls /dev/i2c-1
-i2cdetect -y 1
-```
-
-Use `manage.sh` as the primary install path. It creates the virtual environment inside this project folder, installs the app into that environment, asks for the MeshCore host, port, channel name, and optional channel key, writes those settings into `config.toml`, and installs the `systemd` service.
-
-If you run `./manage.sh` with no arguments, it lists the available commands. `install` prompts for MeshCore connection details, and all commands print stage-by-stage progress while they work.
-
-```bash
-chmod +x manage.sh
-sudo ./manage.sh install
-```
-
-## Configuration
-
-Review `config.toml` after install if you want to adjust sensor or alert settings beyond the prompted MeshCore values.
-
-### pyMC Companion Setup
-
-If you are using the intended self-hosted layout with `pyMC_Repeater`:
-
-1. Log into the `pyMC` web interface.
-2. Go to `Companions`.
-3. Create a new companion.
-4. Set the companion name.
-5. Set the companion TCP port. This project’s README examples assume `5000`.
-6. Save the companion.
-7. Use that companion IP and port in this app’s `config.toml`.
-
-On the same host, that will typically look like:
-
-```toml
-[meshcore]
-host = "127.0.0.1"
-port = 5000
-```
-
-If `pyMC` is on another device, use that device’s reachable IP address instead of `127.0.0.1`.
-
-Hashtag room example:
-
-```toml
-[meshcore]
-channel_name = "#lightning"
-channel_key = ""
-```
-
-Private room example:
-
-```toml
-[meshcore]
-channel_name = "lightning-private"
-channel_key = "00112233445566778899AABBCCDDEEFF"
-```
-
-After install, start the service:
-
-```bash
-sudo ./manage.sh start
-sudo ./manage.sh status
-sudo ./manage.sh test
-sudo ./manage.sh send "Lightning detector manual message test"
-sudo ./manage.sh logs
-```
-
-Other service commands:
-
-```bash
-sudo ./manage.sh stop
-sudo ./manage.sh restart
-sudo ./manage.sh disable
-sudo ./manage.sh test
-sudo ./manage.sh send "Hello from manage.sh"
-sudo ./manage.sh uninstall
-```
-
-The installer creates `/etc/systemd/system/meshcore-lightning.service` and runs the monitor from this repo’s `.venv`.
+- wiring the AS3935 to the PiMesh-1W `I2C / QT` port
+- enabling Raspberry Pi I2C only if needed
+- creating the companion in `pyMC`
+- running `sudo ./manage.sh install`
+- verifying the channel with `sudo ./manage.sh test`
+- sending a live outbound message with `sudo ./manage.sh send`
 
 ## Useful Commands
 
