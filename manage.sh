@@ -48,6 +48,38 @@ run_as_owner() {
   fi
 }
 
+repair_generated_ownership() {
+  if [[ "${EUID}" -ne 0 || "${RUN_USER}" == "root" ]]; then
+    return
+  fi
+
+  stage "Repairing ownership of generated project files"
+
+  local paths=()
+  if [[ -d "${VENV_PATH}" ]]; then
+    paths+=("${VENV_PATH}")
+  fi
+  if [[ -f "${CONFIG_PATH}" ]]; then
+    paths+=("${CONFIG_PATH}")
+  fi
+
+  while IFS= read -r path; do
+    paths+=("${path}")
+  done < <(find "${SCRIPT_DIR}" -maxdepth 1 -type d -name '*.egg-info' 2>/dev/null)
+
+  while IFS= read -r path; do
+    paths+=("${path}")
+  done < <(find "${SCRIPT_DIR}" -maxdepth 2 -type d -name '__pycache__' 2>/dev/null)
+
+  if [[ "${#paths[@]}" -eq 0 ]]; then
+    info "No generated files needed ownership repair"
+    return
+  fi
+
+  info "Ensuring generated files are owned by ${RUN_USER}:${RUN_GROUP}"
+  sudo chown -R "${RUN_USER}:${RUN_GROUP}" "${paths[@]}"
+}
+
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing required command: $1" >&2
@@ -286,6 +318,7 @@ EOF
 
 install_app() {
   stage "Installing MeshCore Pi Lightning Detector"
+  repair_generated_ownership
   ensure_python_env
   ensure_config
   collect_meshcore_settings
