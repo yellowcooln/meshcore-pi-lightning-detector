@@ -31,21 +31,14 @@ Raw silk labels on the tested sensor board are:
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
 By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
 
-For the tested board, use the separate 4-pin I2C header on the sensor board:
+For the tested board, the current setup only uses these 4 raw sensor pins:
 
-- `GND`
-- `+3V3`
-- `SDA_3V`
-- `SCL_3V`
-
-Wire that to the PiMesh-1W `I2C / QT` header as:
-
+- sensor `VCC` -> PiMesh `+3V3`
 - sensor `GND` -> PiMesh `GND`
-- sensor `+3V3` -> PiMesh `+3V3`
-- sensor `SDA_3V` -> PiMesh `SDA_3V`
-- sensor `SCL_3V` -> PiMesh `SCL_3V`
+- sensor `MOSI` -> PiMesh `SDA_3V`
+- sensor `SCL` -> PiMesh `SCL_3V`
 
-The tested board already presents the sensor in I2C form on that header, so you do not need to manually wire the raw `SI`, `CS`, `EN-V`, `MOSI`, `SCL`, `GND`, or `VCC` breakout pins for this setup.
+That is the 4-wire I2C hookup for this board. You are not using `AI`, `AO`, `EN-V`, `IRQ`, `SI`, `CS`, or `MISO` in this setup.
 
 ## 2. Clone The Repo
 
