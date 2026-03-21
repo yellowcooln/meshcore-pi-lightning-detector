@@ -275,7 +275,7 @@ collect_alert_message_settings() {
   echo "    1) Keep current setting"
   echo "    2) Detailed: lightning detected at {time} | distance={distance} | energy={energy}"
   echo "    3) Time only: lightning detected at {time}"
-  echo "    4) Time and date: lightning detected at {time12} on {date}"
+  echo "    4) Time and date: lightning detected at {time} on {date}"
   echo "    5) Minimal: lightning detected"
   echo "    6) Custom template"
 
@@ -293,7 +293,7 @@ collect_alert_message_settings() {
       LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
       ;;
     4)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time12} on {date}"
+      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time} on {date}"
       ;;
     5)
       LIGHTNING_MESSAGE_TEMPLATE="lightning detected"

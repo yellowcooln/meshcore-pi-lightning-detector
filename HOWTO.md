@@ -147,7 +147,7 @@ If you want to change the outbound lightning message after install, run:
 sudo bash manage.sh setup
 ```
 
-That command gives you preset message styles first, lets you choose `km` or `mi` for `{distance}`, lets you choose `12h` or `24h` for `{time}`, and only asks for a full template if you choose the custom option. The built-in presets include `lightning detected at {time} | distance={distance} | energy={energy}`, `lightning detected at {time}`, `lightning detected at {time12} on {date}`, and `lightning detected`. It then updates `config.toml`.
+That command gives you preset message styles first, lets you choose `km` or `mi` for `{distance}`, lets you choose `12h` or `24h` for `{time}`, and only asks for a full template if you choose the custom option. The built-in presets include `lightning detected at {time} | distance={distance} | energy={energy}`, `lightning detected at {time}`, `lightning detected at {time} on {date}`, and `lightning detected`. It then updates `config.toml`.
 
 Available placeholders in the template are:
 
@@ -164,7 +164,7 @@ Available placeholders in the template are:
 Example:
 
 ```text
-lightning detected at {time12} on {date}
+lightning detected at {time} on {date}
 ```
 
 ## 10. Notes
