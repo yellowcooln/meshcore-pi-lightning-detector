@@ -26,6 +26,7 @@ cooldown_seconds = 60
 send_noise_messages = false
 send_disturber_messages = false
 message_prefix = "AS3935"
+lightning_message_template = "{prefix}: lightning detected | distance={distance} | energy={energy}"
 
 [logging]
 level = "INFO"

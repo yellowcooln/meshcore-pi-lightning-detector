@@ -22,6 +22,7 @@ Usage: ./manage.sh <command>
 
 Commands:
   install    Create/update venv, install app, install systemd service, enable service
+  setup      Reconfigure alert message settings in config.toml
   start      Start the systemd service
   stop       Stop the systemd service
   restart    Restart the systemd service
@@ -223,6 +224,22 @@ collect_meshcore_settings() {
   fi
 }
 
+collect_alert_message_settings() {
+  stage "Collecting alert message settings"
+
+  local source_path="${CONFIG_PATH}"
+  if [[ ! -f "${source_path}" ]]; then
+    source_path="${EXAMPLE_CONFIG_PATH}"
+  fi
+
+  local default_lightning_template
+  default_lightning_template="$(read_config_value "${source_path}" alerts lightning_message_template)"
+
+  LIGHTNING_MESSAGE_TEMPLATE="$(prompt_with_default "Lightning message template" "${default_lightning_template}")"
+
+  info "Lightning message template: ${LIGHTNING_MESSAGE_TEMPLATE}"
+}
+
 write_meshcore_config() {
   stage "Writing MeshCore settings to config.toml"
   info "Updating [meshcore] settings in ${CONFIG_PATH}"
@@ -253,19 +270,23 @@ data["meshcore"]["channel_key"] = os.environ["MESHCORE_CHANNEL_KEY"].upper()
 def dump_bool(value: bool) -> str:
     return "true" if value else "false"
 
+def dump_string(value: str) -> str:
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
 lines = [
     "[meshcore]",
-    f'host = "{data["meshcore"]["host"]}"',
+    f'host = {dump_string(data["meshcore"]["host"])}',
     f'port = {data["meshcore"]["port"]}',
-    f'channel_name = "{data["meshcore"]["channel_name"]}"',
-    f'channel_key = "{data["meshcore"]["channel_key"]}"',
+    f'channel_name = {dump_string(data["meshcore"]["channel_name"])}',
+    f'channel_key = {dump_string(data["meshcore"]["channel_key"])}',
     f'channel_slot = {data["meshcore"]["channel_slot"]}',
     f'always_configure_channel = {dump_bool(data["meshcore"]["always_configure_channel"])}',
     f'connect_timeout_seconds = {data["meshcore"]["connect_timeout_seconds"]}',
     "",
     "[sensor]",
     f'i2c_bus = {data["sensor"]["i2c_bus"]}',
-    f'i2c_address = "{data["sensor"]["i2c_address"]}"',
+    f'i2c_address = {dump_string(data["sensor"]["i2c_address"])}',
     f'indoor = {dump_bool(data["sensor"]["indoor"])}',
     f'noise_floor = {data["sensor"]["noise_floor"]}',
     f'watchdog_threshold = {data["sensor"]["watchdog_threshold"]}',
@@ -281,10 +302,79 @@ lines = [
     f'cooldown_seconds = {data["alerts"]["cooldown_seconds"]}',
     f'send_noise_messages = {dump_bool(data["alerts"]["send_noise_messages"])}',
     f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
-    f'message_prefix = "{data["alerts"]["message_prefix"]}"',
+    f'message_prefix = {dump_string(data["alerts"]["message_prefix"])}',
+    f'lightning_message_template = {dump_string(data["alerts"]["lightning_message_template"])}',
     "",
     "[logging]",
-    f'level = "{data["logging"]["level"]}"',
+    f'level = {dump_string(data["logging"]["level"])}',
+    "",
+]
+
+config_path.write_text("\n".join(lines), encoding="utf-8")
+PY
+}
+
+write_alert_message_config() {
+  stage "Writing alert message settings to config.toml"
+  info "Updating [alerts] settings in ${CONFIG_PATH}"
+  run_as_owner env \
+    CONFIG_PATH="${CONFIG_PATH}" \
+    EXAMPLE_CONFIG_PATH="${EXAMPLE_CONFIG_PATH}" \
+    LIGHTNING_MESSAGE_TEMPLATE="${LIGHTNING_MESSAGE_TEMPLATE}" \
+    "${PYTHON_BIN}" - <<'PY'
+import os
+import tomllib
+from pathlib import Path
+
+config_path = Path(os.environ["CONFIG_PATH"])
+example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
+source_path = config_path if config_path.exists() else example_path
+
+with source_path.open("rb") as handle:
+    data = tomllib.load(handle)
+
+data["alerts"]["lightning_message_template"] = os.environ["LIGHTNING_MESSAGE_TEMPLATE"]
+
+def dump_bool(value: bool) -> str:
+    return "true" if value else "false"
+
+def dump_string(value: str) -> str:
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+lines = [
+    "[meshcore]",
+    f'host = {dump_string(data["meshcore"]["host"])}',
+    f'port = {data["meshcore"]["port"]}',
+    f'channel_name = {dump_string(data["meshcore"]["channel_name"])}',
+    f'channel_key = {dump_string(data["meshcore"]["channel_key"])}',
+    f'channel_slot = {data["meshcore"]["channel_slot"]}',
+    f'always_configure_channel = {dump_bool(data["meshcore"]["always_configure_channel"])}',
+    f'connect_timeout_seconds = {data["meshcore"]["connect_timeout_seconds"]}',
+    "",
+    "[sensor]",
+    f'i2c_bus = {data["sensor"]["i2c_bus"]}',
+    f'i2c_address = {dump_string(data["sensor"]["i2c_address"])}',
+    f'indoor = {dump_bool(data["sensor"]["indoor"])}',
+    f'noise_floor = {data["sensor"]["noise_floor"]}',
+    f'watchdog_threshold = {data["sensor"]["watchdog_threshold"]}',
+    f'spike_rejection = {data["sensor"]["spike_rejection"]}',
+    f'minimum_lightnings = {data["sensor"]["minimum_lightnings"]}',
+    f'mask_disturbers = {dump_bool(data["sensor"]["mask_disturbers"])}',
+    f'reset_defaults_on_start = {dump_bool(data["sensor"]["reset_defaults_on_start"])}',
+    f'calibrate_on_start = {dump_bool(data["sensor"]["calibrate_on_start"])}',
+    f'clear_statistics_on_start = {dump_bool(data["sensor"]["clear_statistics_on_start"])}',
+    f'poll_interval_seconds = {data["sensor"]["poll_interval_seconds"]}',
+    "",
+    "[alerts]",
+    f'cooldown_seconds = {data["alerts"]["cooldown_seconds"]}',
+    f'send_noise_messages = {dump_bool(data["alerts"]["send_noise_messages"])}',
+    f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
+    f'message_prefix = {dump_string(data["alerts"]["message_prefix"])}',
+    f'lightning_message_template = {dump_string(data["alerts"]["lightning_message_template"])}',
+    "",
+    "[logging]",
+    f'level = {dump_string(data["logging"]["level"])}',
     "",
 ]
 
@@ -347,6 +437,19 @@ install_app() {
   echo "Next steps:"
   echo "  1. If /dev/i2c-1 is missing, enable I2C on the Pi and reboot"
   echo "  2. Run: ./manage.sh start"
+}
+
+setup_alerts() {
+  stage "Configuring alert message settings"
+  repair_generated_ownership
+  ensure_config
+  collect_alert_message_settings
+  write_alert_message_config
+  echo
+  echo "Setup complete."
+  echo "Next steps:"
+  echo "  1. Run: ./manage.sh test"
+  echo "  2. Run: ./manage.sh send"
 }
 
 start_service() {
@@ -447,6 +550,9 @@ main() {
       ;;
     install)
       install_app
+      ;;
+    setup)
+      setup_alerts
       ;;
     start)
       start_service

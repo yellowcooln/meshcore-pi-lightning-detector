@@ -61,6 +61,7 @@ That guide covers:
 - enabling Raspberry Pi I2C only if needed
 - creating the companion in `pyMC`
 - running `sudo bash manage.sh install`
+- running `sudo bash manage.sh setup` to change the lightning message template
 - verifying the channel with `sudo bash manage.sh test`
 - sending a live outbound message with `sudo bash manage.sh send`
 
@@ -90,6 +91,12 @@ Send a message to the configured channel through the project-managed virtualenv:
 ```bash
 sudo bash manage.sh send
 sudo bash manage.sh send "Lightning detector manual message test"
+```
+
+Reconfigure the lightning alert message template:
+
+```bash
+sudo bash manage.sh setup
 ```
 
 Run the monitor interactively:

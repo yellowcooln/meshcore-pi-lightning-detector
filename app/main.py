@@ -101,12 +101,19 @@ def apply_runtime_overrides(config: AppConfig, args: argparse.Namespace) -> AppC
 def format_alert_message(config: AppConfig, event) -> str:
     prefix = config.alerts.message_prefix
     if event.kind == "lightning":
-        details = [f"{prefix}: lightning detected"]
-        if event.distance_text:
-            details.append(f"distance={event.distance_text}")
-        if event.energy is not None:
-            details.append(f"energy={event.energy}")
-        return " | ".join(details)
+        class SafeFormatDict(dict):
+            def __missing__(self, key):
+                return "{" + key + "}"
+
+        return config.alerts.lightning_message_template.format_map(
+            SafeFormatDict(
+                prefix=prefix,
+                distance=event.distance_text or "distance unavailable",
+                energy=event.energy if event.energy is not None else "unknown",
+                interrupt_code=f"0x{event.interrupt_code:02X}",
+                kind=event.kind,
+            )
+        )
     if event.kind == "noise":
         return f"{prefix}: sensor noise floor too high"
     if event.kind == "disturber":

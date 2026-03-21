@@ -137,14 +137,38 @@ sudo bash manage.sh disable
 sudo bash manage.sh uninstall
 ```
 
-## 9. Notes
+## 9. Change The Lightning Message Later
+
+If you want to change the outbound lightning message after install, run:
+
+```bash
+sudo bash manage.sh setup
+```
+
+That command prompts for the lightning message template and updates `config.toml`.
+
+Available placeholders in the template are:
+
+- `{prefix}`
+- `{distance}`
+- `{energy}`
+- `{interrupt_code}`
+- `{kind}`
+
+Example:
+
+```text
+{prefix}: strike at {distance} with energy {energy}
+```
+
+## 10. Notes
 
 - `test` only verifies the channel can be configured; it does not send a message.
 - `send` is the outbound message test.
 - `config.toml` is local deployment state and is git-ignored.
 - The service runs from this repo’s `.venv`.
 
-## 10. config.toml Reference
+## 11. config.toml Reference
 
 The installer writes `config.toml` for you. You usually only need to change the `meshcore` section, but the other sections control sensor behavior and alerting.
 
@@ -179,6 +203,7 @@ The installer writes `config.toml` for you. You usually only need to change the 
 - `send_noise_messages`: When `true`, noise interrupts are also sent as channel messages.
 - `send_disturber_messages`: When `true`, disturber events are also sent as channel messages.
 - `message_prefix`: Prefix added to outbound alert text.
+- `lightning_message_template`: Template for the actual lightning alert text. Supports `{prefix}`, `{distance}`, `{energy}`, `{interrupt_code}`, and `{kind}`.
 
 ### `[logging]`
 

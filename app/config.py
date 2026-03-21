@@ -87,6 +87,7 @@ class AlertSettings:
     send_noise_messages: bool
     send_disturber_messages: bool
     message_prefix: str
+    lightning_message_template: str
 
 
 @dataclass(frozen=True)
@@ -158,6 +159,12 @@ def load_config(path: str | Path | None = None) -> AppConfig:
         send_noise_messages=bool(alerts_raw.get("send_noise_messages", False)),
         send_disturber_messages=bool(alerts_raw.get("send_disturber_messages", False)),
         message_prefix=str(alerts_raw.get("message_prefix", "AS3935")).strip(),
+        lightning_message_template=str(
+            alerts_raw.get(
+                "lightning_message_template",
+                "{prefix}: lightning detected | distance={distance} | energy={energy}",
+            )
+        ).strip(),
     )
 
     logging = LoggingSettings(level=str(logging_raw.get("level", "INFO")).upper())
