@@ -83,3 +83,7 @@ python -m unittest discover -s tests -v
 - Lightning alerts are rate-limited by `alerts.cooldown_seconds`.
 - Noise and disturber events are logged and can optionally be sent as messages.
 - `config.toml` is local deployment state and is intentionally ignored by git.
+
+## Support
+
+If you want to support this work, you can use [Ko-fi](https://ko-fi.com/yellowcooln).
