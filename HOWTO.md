@@ -142,3 +142,43 @@ sudo bash manage.sh uninstall
 - `send` is the outbound message test.
 - `config.toml` is local deployment state and is git-ignored.
 - The service runs from this repo’s `.venv`.
+
+## 10. config.toml Reference
+
+The installer writes `config.toml` for you. You usually only need to change the `meshcore` section, but the other sections control sensor behavior and alerting.
+
+### `[meshcore]`
+
+- `host`: MeshCore TCP host or IP. For the intended local `pyMC` companion setup, use `0.0.0.0`.
+- `port`: MeshCore TCP port. The current stack assumes `5000`.
+- `channel_name`: Target room name. If it starts with `#`, the app derives the room key from the name.
+- `channel_key`: Optional 32-hex-character key for private channels. Leave blank for hashtag rooms.
+- `channel_slot`: Temporary radio slot the app uses when loading the channel before send.
+- `always_configure_channel`: When `true`, the app loads the channel before each send instead of assuming the radio already has it.
+- `connect_timeout_seconds`: TCP connect timeout for the MeshCore node.
+
+### `[sensor]`
+
+- `i2c_bus`: Linux I2C bus number. On the PiMesh-1W this should be `1`.
+- `i2c_address`: AS3935 I2C address as a string such as `"0x03"`.
+- `indoor`: Sets the AS3935 indoor/outdoor front-end mode.
+- `noise_floor`: Noise threshold tuning. Higher values make the detector less sensitive to background noise.
+- `watchdog_threshold`: Event qualification threshold used by the AS3935.
+- `spike_rejection`: Rejects short spikes that are not likely to be real lightning events.
+- `minimum_lightnings`: Number of strikes needed before the sensor reports an event. Valid values are `1`, `5`, `9`, or `16`.
+- `mask_disturbers`: When `true`, filters out some man-made interference classifications.
+- `reset_defaults_on_start`: Resets the AS3935 registers to defaults before applying this config.
+- `calibrate_on_start`: Runs AS3935 calibration during app startup.
+- `clear_statistics_on_start`: Clears the sensor’s internal lightning statistics at startup.
+- `poll_interval_seconds`: Poll interval for checking sensor interrupts.
+
+### `[alerts]`
+
+- `cooldown_seconds`: Minimum time between lightning alert messages.
+- `send_noise_messages`: When `true`, noise interrupts are also sent as channel messages.
+- `send_disturber_messages`: When `true`, disturber events are also sent as channel messages.
+- `message_prefix`: Prefix added to outbound alert text.
+
+### `[logging]`
+
+- `level`: Log verbosity, typically `INFO` or `DEBUG`.
