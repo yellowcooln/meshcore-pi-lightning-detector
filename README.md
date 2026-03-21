@@ -2,6 +2,8 @@
 
 Python service for a Raspberry Pi that reads an AS3935 lightning sensor over I2C and publishes lightning alerts to a MeshCore node over TCP.
 
+This project was made for and tested against the MeshSmith [PiMesh-1W](https://meshsmith.net/products/pimesh-1w).
+
 Current defaults:
 
 - MeshCore TCP node: `192.168.30.52:5002`
@@ -20,6 +22,8 @@ This project is meant to run unattended on a Pi as a small field service:
 The MeshCore TCP send path and dynamic channel loading were verified against a live node. Hardware polling logic is implemented but still needs end-to-end validation on the final Pi plus sensor assembly.
 
 ## Hardware Wiring
+
+Primary target hardware is the MeshSmith PiMesh-1W. The I2C assumptions in this project, including use of `/dev/i2c-1`, are based on that platform.
 
 For a Raspberry Pi 40-pin header:
 
