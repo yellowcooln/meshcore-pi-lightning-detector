@@ -26,7 +26,7 @@ Commands:
   stop       Stop the systemd service
   restart    Restart the systemd service
   status     Show systemd service status
-  test       Run a one-shot MeshCore verify/probe using the project virtualenv
+  test       Verify the configured channel can be loaded without sending a message
   send       Send a custom message to the configured channel
   logs       Tail service logs
   uninstall  Stop and remove the systemd service
@@ -384,11 +384,11 @@ logs_service() {
 }
 
 test_runtime() {
-  stage "Running one-shot MeshCore probe"
+  stage "Verifying configured channel"
   ensure_runtime_ready
   info "Using ${CONFIG_PATH}"
-  info "Running verify-channel --send-probe from the project virtual environment"
-  run_as_owner "${VENV_PATH}/bin/meshcore-lightning" --config "${CONFIG_PATH}" verify-channel --send-probe
+  info "Running verify-channel without sending a message"
+  run_as_owner "${VENV_PATH}/bin/meshcore-lightning" --config "${CONFIG_PATH}" verify-channel
 }
 
 send_custom_message() {

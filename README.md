@@ -177,13 +177,13 @@ meshcore-lightning verify-channel --send-probe
 meshcore-lightning --channel-name "#temporary-check" verify-channel --send-probe
 ```
 
-Run the same probe through the project-managed virtualenv without activating `.venv`:
+Verify that the configured channel can be loaded without sending a message:
 
 ```bash
 sudo ./manage.sh test
 ```
 
-Send a custom message to the configured channel through the project-managed virtualenv:
+Send a message to the configured channel through the project-managed virtualenv:
 
 ```bash
 sudo ./manage.sh send
