@@ -8,8 +8,8 @@ class MainTests(unittest.TestCase):
     def test_format_lightning_alert(self) -> None:
         config = AppConfig(
             meshcore=MeshCoreSettings(
-                host="192.168.30.52",
-                port=5002,
+                host="0.0.0.0",
+                port=5000,
                 channel_name="#lightning",
                 channel_key="",
                 channel_slot=0,

@@ -107,8 +107,8 @@ def load_config(path: str | Path | None = None) -> AppConfig:
     logging_raw = raw.get("logging", {})
 
     meshcore = MeshCoreSettings(
-        host=str(meshcore_raw.get("host", "192.168.30.52")).strip(),
-        port=_coerce_int(meshcore_raw.get("port", 5002), "meshcore.port"),
+        host=str(meshcore_raw.get("host", "0.0.0.0")).strip(),
+        port=_coerce_int(meshcore_raw.get("port", 5000), "meshcore.port"),
         channel_name=str(meshcore_raw.get("channel_name", "#lightning")).strip(),
         channel_key=_normalize_key(str(meshcore_raw.get("channel_key", ""))),
         channel_slot=_coerce_int(meshcore_raw.get("channel_slot", 0), "meshcore.channel_slot"),
