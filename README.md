@@ -45,13 +45,17 @@ If your breakout exposes Qwiic / STEMMA QT, it should plug into that PiMesh-1W `
 - `app/meshcore_client.py`: MeshCore TCP connect, channel configure, and send logic
 - `app/config.py`: TOML config loading and validation
 - `HOWTO.md`: start-to-finish deployment guide for the current stack
+- `BUILDROOT.md`: Buildroot / Luckfox deployment notes and image requirements
 - `manage.sh`: install and service lifecycle management
+- `buildroot-manage.sh`: Buildroot-oriented install and process management
 - `config.example.toml`: deployment template
 - `tests/`: unit tests
 
 ## Setup Guide
 
 For the full current-stack deployment guide, read [HOWTO.md](HOWTO.md).
+
+For Buildroot / Luckfox images, read [BUILDROOT.md](BUILDROOT.md).
 
 That guide covers:
 

@@ -162,7 +162,12 @@ read_config_value() {
   local section="$2"
   local key="$3"
   "${PYTHON_BIN}" - "$file" "$section" "$key" <<'PY'
-import sys, tomllib
+import sys
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 path, section, key = sys.argv[1:4]
 with open(path, "rb") as handle:
@@ -178,7 +183,12 @@ read_config_value_with_fallback() {
   local section="$3"
   local key="$4"
   "${PYTHON_BIN}" - "$file" "$fallback_file" "$section" "$key" <<'PY'
-import sys, tomllib
+import sys
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 path, fallback_path, section, key = sys.argv[1:5]
 

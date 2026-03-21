@@ -1,4 +1,5 @@
 .venv/
+.buildroot-runtime/
 __pycache__/
 *.pyc
 *.pyo
