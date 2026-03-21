@@ -328,9 +328,8 @@ install_app() {
   echo
   echo "Install complete."
   echo "Next steps:"
-  echo "  1. Review ${CONFIG_PATH}"
-  echo "  2. If /dev/i2c-1 is missing, enable I2C on the Pi and reboot"
-  echo "  3. Run: ./manage.sh start"
+  echo "  1. If /dev/i2c-1 is missing, enable I2C on the Pi and reboot"
+  echo "  2. Run: ./manage.sh start"
 }
 
 start_service() {
