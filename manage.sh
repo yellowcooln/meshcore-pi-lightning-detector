@@ -463,6 +463,55 @@ config_path.write_text("\n".join(lines), encoding="utf-8")
 PY
 }
 
+render_default_lightning_message() {
+  ensure_runtime_ready
+  run_as_owner env \
+    CONFIG_PATH="${CONFIG_PATH}" \
+    EXAMPLE_CONFIG_PATH="${EXAMPLE_CONFIG_PATH}" \
+    "${PYTHON_BIN}" - <<'PY'
+import os
+import tomllib
+from pathlib import Path
+from datetime import datetime
+
+config_path = Path(os.environ["CONFIG_PATH"])
+example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
+
+with example_path.open("rb") as handle:
+    data = tomllib.load(handle)
+
+if config_path.exists():
+    with config_path.open("rb") as handle:
+        current = tomllib.load(handle)
+    for section, values in current.items():
+        if isinstance(values, dict) and isinstance(data.get(section), dict):
+            data[section].update(values)
+        else:
+            data[section] = values
+
+template = data["alerts"]["lightning_message_template"]
+prefix = data["alerts"]["message_prefix"]
+sample_time = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+
+class SafeFormatDict(dict):
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+message = template.format_map(
+    SafeFormatDict(
+        prefix=prefix,
+        distance="12 km",
+        energy="12345",
+        interrupt_code="0x08",
+        kind="lightning",
+        time=sample_time,
+    )
+)
+
+print(message)
+PY
+}
+
 report_i2c_status() {
   stage "Checking Raspberry Pi I2C status"
   if [[ -e /dev/i2c-1 ]]; then
@@ -586,9 +635,11 @@ test_runtime() {
 send_custom_message() {
   stage "Sending custom channel message"
   ensure_runtime_ready
-  local message="MeshCore Pi Lightning Detector manual send test"
+  local message=""
   if [[ $# -ge 1 ]]; then
     message="$*"
+  else
+    message="$(render_default_lightning_message)"
   fi
   info "Using ${CONFIG_PATH}"
   info "Sending message to the configured channel"

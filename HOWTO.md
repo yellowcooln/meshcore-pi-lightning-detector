@@ -122,6 +122,8 @@ sudo bash manage.sh send
 sudo bash manage.sh send "Lightning detector manual message test"
 ```
 
+If you run `send` without a message, it sends a sample rendered from the currently configured lightning message template.
+
 Watch logs:
 
 ```bash
@@ -165,7 +167,7 @@ lightning detected at {time}
 ## 10. Notes
 
 - `test` only verifies the channel can be configured; it does not send a message.
-- `send` is the outbound message test.
+- `send` is the outbound message test. Without an explicit message, it sends a sample rendered from the current lightning template.
 - `config.toml` is local deployment state and is git-ignored.
 - The service runs from this repo’s `.venv`.
 

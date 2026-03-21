@@ -93,6 +93,8 @@ sudo bash manage.sh send
 sudo bash manage.sh send "Lightning detector manual message test"
 ```
 
+When you run `send` with no message, it sends a sample rendered from your current `lightning_message_template`.
+
 Reconfigure the lightning alert message template:
 
 ```bash
