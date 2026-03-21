@@ -113,6 +113,7 @@ python -m unittest discover -s tests -v
 ## Behavior Notes
 
 - The app reconfigures the target channel before sends by default.
+- By default, the sensor address is set to `i2c_address = "auto"` and the app will try the common AS3935 I2C addresses on startup.
 - Lightning alerts are rate-limited by `alerts.cooldown_seconds`.
 - Noise and disturber events are logged and can optionally be sent as messages.
 - `config.toml` is local deployment state and is intentionally ignored by git.

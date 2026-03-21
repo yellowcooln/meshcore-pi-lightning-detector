@@ -134,6 +134,7 @@ async def run_monitor(config: AppConfig) -> None:
 
     try:
         sensor.configure()
+        logger.info("AS3935 configured at I2C address 0x%02X", sensor.address)
         await client.connect()
         logger.info("Sensor configured and MeshCore connection established")
 

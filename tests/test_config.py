@@ -56,6 +56,28 @@ class ConfigTests(unittest.TestCase):
                 "00112233445566778899AABBCCDDEEFF",
             )
 
+    def test_auto_i2c_address_maps_to_none(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+                    i2c_address = "auto"
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    """
+                ).strip()
+            )
+            config = load_config(config_path)
+            self.assertIsNone(config.sensor.i2c_address)
+
 
 if __name__ == "__main__":
     unittest.main()

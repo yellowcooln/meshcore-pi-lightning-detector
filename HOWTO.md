@@ -15,6 +15,7 @@ Board reference:
 ![PiMesh-1W board layout](https://meshsmith.net/pimesh/base.png)
 
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
+By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
 
 ## 2. Clone The Repo
 
@@ -160,7 +161,7 @@ The installer writes `config.toml` for you. You usually only need to change the 
 ### `[sensor]`
 
 - `i2c_bus`: Linux I2C bus number. On the PiMesh-1W this should be `1`.
-- `i2c_address`: AS3935 I2C address as a string such as `"0x03"`.
+- `i2c_address`: AS3935 I2C address. Use `"auto"` to try the common AS3935 addresses automatically, or set an explicit value such as `"0x03"` if needed.
 - `indoor`: Sets the AS3935 indoor/outdoor front-end mode.
 - `noise_floor`: Noise threshold tuning. Higher values make the detector less sensitive to background noise.
 - `watchdog_threshold`: Event qualification threshold used by the AS3935.

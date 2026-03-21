@@ -35,6 +35,8 @@ MIN_LIGHTNING_BITS = {
     16: 0b11,
 }
 
+COMMON_AS3935_I2C_ADDRESSES = (0x03, 0x02, 0x01, 0x00)
+
 
 @dataclass(frozen=True)
 class LightningEvent:
@@ -49,10 +51,14 @@ class AS3935:
     def __init__(self, settings: SensorSettings):
         self.settings = settings
         self._bus = SMBus(settings.i2c_bus)
-        self._address = settings.i2c_address
+        self._address = self._resolve_address(settings.i2c_address)
 
     def close(self) -> None:
         self._bus.close()
+
+    @property
+    def address(self) -> int:
+        return self._address
 
     def configure(self) -> None:
         if self.settings.reset_defaults_on_start:
@@ -129,6 +135,45 @@ class AS3935:
         current = self._read_register(register)
         updated = (current & ~mask) | (value & mask)
         self._write_register(register, updated)
+
+    def _resolve_address(self, configured_address: int | None) -> int:
+        if configured_address is not None:
+            return configured_address
+
+        detected = self.detect_address(self._bus)
+        if detected is None:
+            raise RuntimeError(
+                "Could not auto-detect an AS3935 on the I2C bus. "
+                "Set sensor.i2c_address explicitly in config.toml."
+            )
+        return detected
+
+    @classmethod
+    def detect_address(cls, bus: SMBus) -> int | None:
+        detected_addresses = [
+            address for address in COMMON_AS3935_I2C_ADDRESSES if cls._address_responds(bus, address)
+        ]
+        if len(detected_addresses) == 1:
+            return detected_addresses[0]
+        if len(detected_addresses) > 1:
+            raise RuntimeError(
+                "Multiple candidate AS3935 I2C addresses responded: "
+                + ", ".join(f"0x{address:02X}" for address in detected_addresses)
+                + ". Set sensor.i2c_address explicitly in config.toml."
+            )
+        return None
+
+    @staticmethod
+    def _address_responds(bus: SMBus, address: int) -> bool:
+        try:
+            # Probe a few low registers the app already uses. A successful response
+            # is enough for a best-effort address guess on common AS3935 addresses.
+            bus.read_byte_data(address, REG_AFE)
+            bus.read_byte_data(address, REG_INTERRUPT)
+            bus.read_byte_data(address, REG_DISTANCE)
+            return True
+        except OSError:
+            return False
 
     @staticmethod
     def _distance_to_km(raw_distance: int) -> int | None:

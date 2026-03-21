@@ -18,6 +18,12 @@ def _coerce_int(value: Any, field_name: str) -> int:
     raise ValueError(f"{field_name} must be an integer")
 
 
+def _coerce_optional_i2c_address(value: Any, field_name: str) -> int | None:
+    if isinstance(value, str) and value.strip().lower() in {"", "auto"}:
+        return None
+    return _coerce_int(value, field_name)
+
+
 def _coerce_float(value: Any, field_name: str) -> float:
     if isinstance(value, (int, float)):
         return float(value)
@@ -62,7 +68,7 @@ class MeshCoreSettings:
 @dataclass(frozen=True)
 class SensorSettings:
     i2c_bus: int
-    i2c_address: int
+    i2c_address: int | None
     indoor: bool
     noise_floor: int
     watchdog_threshold: int
@@ -121,7 +127,10 @@ def load_config(path: str | Path | None = None) -> AppConfig:
 
     sensor = SensorSettings(
         i2c_bus=_coerce_int(sensor_raw.get("i2c_bus", 1), "sensor.i2c_bus"),
-        i2c_address=_coerce_int(sensor_raw.get("i2c_address", "0x03"), "sensor.i2c_address"),
+        i2c_address=_coerce_optional_i2c_address(
+            sensor_raw.get("i2c_address", "auto"),
+            "sensor.i2c_address",
+        ),
         indoor=bool(sensor_raw.get("indoor", True)),
         noise_floor=_coerce_int(sensor_raw.get("noise_floor", 2), "sensor.noise_floor"),
         watchdog_threshold=_coerce_int(
@@ -172,7 +181,7 @@ def _validate_config(
 
     if sensor.i2c_bus < 0:
         raise ValueError("sensor.i2c_bus must be zero or greater")
-    if sensor.i2c_address < 0 or sensor.i2c_address > 0x7F:
+    if sensor.i2c_address is not None and (sensor.i2c_address < 0 or sensor.i2c_address > 0x7F):
         raise ValueError("sensor.i2c_address must be a 7-bit I2C address")
     if not 0 <= sensor.noise_floor <= 7:
         raise ValueError("sensor.noise_floor must be between 0 and 7")
