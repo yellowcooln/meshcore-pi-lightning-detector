@@ -201,6 +201,17 @@ prompt_optional_with_default() {
   printf '%s' "${result}"
 }
 
+prompt_choice_with_default() {
+  local prompt_text="$1"
+  local default_value="$2"
+  local result=""
+  read -r -p "${prompt_text} [${default_value}]: " result
+  if [[ -z "${result}" ]]; then
+    result="${default_value}"
+  fi
+  printf '%s' "${result}"
+}
+
 collect_meshcore_settings() {
   stage "Collecting MeshCore connection settings"
 
@@ -256,7 +267,38 @@ collect_alert_message_settings() {
   local default_lightning_template
   default_lightning_template="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts lightning_message_template)"
 
-  LIGHTNING_MESSAGE_TEMPLATE="$(prompt_with_default "Lightning message template" "${default_lightning_template}")"
+  info "Choose a lightning message style:"
+  echo "    1) Keep current setting"
+  echo "    2) Detailed: {prefix}: lightning detected | distance={distance} | energy={energy}"
+  echo "    3) Short: {prefix}: lightning at {distance}"
+  echo "    4) Minimal: {prefix}: lightning detected"
+  echo "    5) Custom template"
+
+  local template_choice
+  template_choice="$(prompt_choice_with_default "Select an option" "1")"
+
+  case "${template_choice}" in
+    1)
+      LIGHTNING_MESSAGE_TEMPLATE="${default_lightning_template}"
+      ;;
+    2)
+      LIGHTNING_MESSAGE_TEMPLATE="{prefix}: lightning detected | distance={distance} | energy={energy}"
+      ;;
+    3)
+      LIGHTNING_MESSAGE_TEMPLATE="{prefix}: lightning at {distance}"
+      ;;
+    4)
+      LIGHTNING_MESSAGE_TEMPLATE="{prefix}: lightning detected"
+      ;;
+    5)
+      echo "  - Available placeholders: {prefix}, {distance}, {energy}, {interrupt_code}, {kind}"
+      LIGHTNING_MESSAGE_TEMPLATE="$(prompt_with_default "Custom lightning message template" "${default_lightning_template}")"
+      ;;
+    *)
+      echo "Invalid setup choice: ${template_choice}" >&2
+      exit 1
+      ;;
+  esac
 
   info "Lightning message template: ${LIGHTNING_MESSAGE_TEMPLATE}"
 }

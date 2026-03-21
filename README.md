@@ -99,6 +99,8 @@ Reconfigure the lightning alert message template:
 sudo bash manage.sh setup
 ```
 
+`setup` offers preset message styles and only asks for a full template if you choose the custom option.
+
 Run the monitor interactively:
 
 ```bash
