@@ -14,24 +14,38 @@ Tested sensor module:
 
 - AS3935 `CJMCU-3935` style breakout, purchased as: https://www.amazon.com/dp/B07SST5GDB
 
+Raw silk labels on the tested sensor board are:
+
+- `AI`
+- `AO`
+- `EN-V`
+- `IRQ`
+- `SI`
+- `CS`
+- `MISO`
+- `MOSI`
+- `SCL`
+- `GND`
+- `VCC`
+
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
 By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
 
-For the tested board, use the sensor board's `CN1` header:
+For the tested board, use the separate 4-pin I2C header on the sensor board:
 
-- `1 GND`
-- `2 +3V3`
-- `3 SDA_3V`
-- `4 SCL_3V`
+- `GND`
+- `+3V3`
+- `SDA_3V`
+- `SCL_3V`
 
 Wire that to the PiMesh-1W `I2C / QT` port as:
 
-- `CN1 pin 1 GND` -> PiMesh `GND`
-- `CN1 pin 2 +3V3` -> PiMesh `3.3V`
-- `CN1 pin 3 SDA_3V` -> PiMesh `SDA`
-- `CN1 pin 4 SCL_3V` -> PiMesh `SCL`
+- `GND` -> PiMesh `GND`
+- `+3V3` -> PiMesh `3.3V`
+- `SDA_3V` -> PiMesh `SDA`
+- `SCL_3V` -> PiMesh `SCL`
 
-The tested board already presents the sensor in I2C form on that header, so you do not need to manually wire the raw `SI`, `CS`, `A0`, `A1`, or `EN` breakout pins for this setup.
+The tested board already presents the sensor in I2C form on that header, so you do not need to manually wire the raw `SI`, `CS`, `EN-V`, `MOSI`, `SCL`, `GND`, or `VCC` breakout pins for this setup.
 
 ## 2. Clone The Repo
 
