@@ -27,7 +27,11 @@ The MeshCore TCP send path and dynamic channel loading were verified against a l
 
 Primary target hardware is the MeshSmith PiMesh-1W. The I2C assumptions in this project, including use of `/dev/i2c-1`, are based on that platform.
 
-On the PiMesh-1W, the AS3935 should connect to the board's `I2C / QT` port.
+Tested sensor module:
+
+- AS3935 `CJMCU-3935` style breakout, purchased as: https://www.amazon.com/dp/B07SST5GDB
+
+On the PiMesh-1W, that AS3935 breakout should connect to the board's `I2C / QT` port, with the module strapped for I2C mode.
 
 If you need to map that back to the underlying Raspberry Pi header, the I2C lines are:
 
@@ -37,6 +41,24 @@ If you need to map that back to the underlying Raspberry Pi header, the I2C line
 - `GND`: any Pi ground pin
 
 If your breakout exposes Qwiic / STEMMA QT, it should plug into that PiMesh-1W `I2C / QT` port and still map to the same Pi I2C bus.
+
+For the tested `CJMCU-3935` board, the working I2C wiring is:
+
+- `VCC` -> `3.3V`
+- `GND` -> `GND`
+- `SCL` -> `SCL`
+- `MOSI` -> `SDA`
+- `SI` -> `3.3V`
+- `CS` -> `GND`
+- `A0` -> `3.3V`
+- `A1` -> `3.3V`
+- `EN` -> `3.3V`
+
+Pins not used by the current app:
+
+- `MISO`
+- `AO`
+- `IRQ`
 
 ## Repository Layout
 

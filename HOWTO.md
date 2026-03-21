@@ -10,8 +10,30 @@ Start-to-finish setup for the current stack:
 
 Connect the AS3935 breakout to the PiMesh-1W `I2C / QT` port.
 
+Tested sensor module:
+
+- AS3935 `CJMCU-3935` style breakout, purchased as: https://www.amazon.com/dp/B07SST5GDB
+
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
 By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
+
+For the tested `CJMCU-3935` board, use this I2C wiring:
+
+- `VCC` -> `3.3V`
+- `GND` -> `GND`
+- `SCL` -> `SCL`
+- `MOSI` -> `SDA`
+- `SI` -> `3.3V`
+- `CS` -> `GND`
+- `A0` -> `3.3V`
+- `A1` -> `3.3V`
+- `EN` -> `3.3V`
+
+Pins not used by the current app:
+
+- `MISO`
+- `AO`
+- `IRQ`
 
 ## 2. Clone The Repo
 
