@@ -179,7 +179,38 @@ sudo bash manage.sh disable
 sudo bash manage.sh uninstall
 ```
 
-## 9. Change The Lightning Message Later
+## 9. Command Reference
+
+Service and management commands:
+
+```bash
+sudo bash manage.sh install
+sudo bash manage.sh setup
+sudo bash manage.sh start
+sudo bash manage.sh start logs
+sudo bash manage.sh stop
+sudo bash manage.sh restart
+sudo bash manage.sh status
+sudo bash manage.sh logs
+sudo bash manage.sh test
+sudo bash manage.sh send
+sudo bash manage.sh send "Lightning detector manual message test"
+sudo bash manage.sh disable
+sudo bash manage.sh uninstall
+```
+
+Direct CLI commands inside the project virtualenv:
+
+```bash
+. .venv/bin/activate
+meshcore-lightning monitor
+meshcore-lightning verify-channel
+meshcore-lightning verify-channel --send-probe
+meshcore-lightning send-test --message "AS3935 MeshCore link test"
+meshcore-lightning --channel-name "#temporary-check" verify-channel --send-probe
+```
+
+## 10. Change The Lightning Message Later
 
 If you want to change the outbound lightning message after install, run:
 
@@ -207,7 +238,7 @@ Example:
 Lightning detected at {time} on {date}
 ```
 
-## 10. Notes
+## 11. Notes
 
 - `test` only verifies the channel can be configured; it does not send a message.
 - `send` is the outbound message test. Without an explicit message, it sends a sample rendered from the current lightning template.
@@ -215,7 +246,7 @@ Lightning detected at {time} on {date}
 - The service runs from this repo’s `.venv`.
 - If startup says `Set sensor.i2c_address explicitly in config.toml.`, run `i2cdetect -y 1`, set `[sensor].i2c_address` in `config.toml`, then `sudo bash manage.sh restart`.
 
-## 11. config.toml Reference
+## 12. config.toml Reference
 
 The installer writes `config.toml` for you. You usually only need to change the `meshcore` section, but the other sections control sensor behavior and alerting.
 
