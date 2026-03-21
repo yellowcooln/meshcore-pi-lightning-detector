@@ -265,7 +265,9 @@ collect_alert_message_settings() {
   fi
 
   local default_lightning_template
+  local default_distance_unit
   default_lightning_template="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts lightning_message_template)"
+  default_distance_unit="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts distance_unit)"
 
   info "Choose a lightning message style:"
   echo "    1) Keep current setting"
@@ -304,6 +306,31 @@ collect_alert_message_settings() {
       ;;
   esac
 
+  info "Choose a distance unit:"
+  echo "    1) Keep current setting (${default_distance_unit})"
+  echo "    2) Kilometers (km)"
+  echo "    3) Miles (mi)"
+
+  local distance_choice
+  distance_choice="$(prompt_choice_with_default "Select an option" "1")"
+
+  case "${distance_choice}" in
+    1)
+      DISTANCE_UNIT="${default_distance_unit}"
+      ;;
+    2)
+      DISTANCE_UNIT="km"
+      ;;
+    3)
+      DISTANCE_UNIT="mi"
+      ;;
+    *)
+      echo "Invalid distance unit choice: ${distance_choice}" >&2
+      exit 1
+      ;;
+  esac
+
+  info "Distance unit: ${DISTANCE_UNIT}"
   info "Lightning message template: ${LIGHTNING_MESSAGE_TEMPLATE}"
 }
 
@@ -379,6 +406,7 @@ lines = [
     f'send_noise_messages = {dump_bool(data["alerts"]["send_noise_messages"])}',
     f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
     f'message_prefix = {dump_string(data["alerts"]["message_prefix"])}',
+    f'distance_unit = {dump_string(data["alerts"]["distance_unit"])}',
     f'lightning_message_template = {dump_string(data["alerts"]["lightning_message_template"])}',
     "",
     "[logging]",
@@ -396,6 +424,7 @@ write_alert_message_config() {
   run_as_owner env \
     CONFIG_PATH="${CONFIG_PATH}" \
     EXAMPLE_CONFIG_PATH="${EXAMPLE_CONFIG_PATH}" \
+    DISTANCE_UNIT="${DISTANCE_UNIT}" \
     LIGHTNING_MESSAGE_TEMPLATE="${LIGHTNING_MESSAGE_TEMPLATE}" \
     "${PYTHON_BIN}" - <<'PY'
 import os
@@ -419,6 +448,7 @@ if source_path != example_path:
             data[section] = values
 
 data["alerts"]["lightning_message_template"] = os.environ["LIGHTNING_MESSAGE_TEMPLATE"]
+data["alerts"]["distance_unit"] = os.environ["DISTANCE_UNIT"]
 
 def dump_bool(value: bool) -> str:
     return "true" if value else "false"
@@ -456,6 +486,7 @@ lines = [
     f'send_noise_messages = {dump_bool(data["alerts"]["send_noise_messages"])}',
     f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
     f'message_prefix = {dump_string(data["alerts"]["message_prefix"])}',
+    f'distance_unit = {dump_string(data["alerts"]["distance_unit"])}',
     f'lightning_message_template = {dump_string(data["alerts"]["lightning_message_template"])}',
     "",
     "[logging]",
@@ -495,6 +526,7 @@ if config_path.exists():
 
 template = data["alerts"]["lightning_message_template"]
 prefix = data["alerts"]["message_prefix"]
+distance_unit = str(data["alerts"].get("distance_unit", "km")).strip().lower()
 sample_date = datetime.now().astimezone().strftime("%Y-%m-%d")
 sample_time24 = datetime.now().astimezone().strftime("%H:%M:%S")
 sample_time12 = datetime.now().astimezone().strftime("%I:%M:%S %p")
@@ -506,7 +538,7 @@ class SafeFormatDict(dict):
 message = template.format_map(
     SafeFormatDict(
         prefix=prefix,
-        distance="12 km",
+        distance="12 km" if distance_unit == "km" else "7.5 mi",
         energy="12345",
         interrupt_code="0x08",
         kind="lightning",

@@ -16,6 +16,23 @@ from app.meshcore_client import MeshCoreChannelClient
 logger = logging.getLogger(__name__)
 
 
+def format_distance_text(config: AppConfig, event) -> str:
+    raw_text = getattr(event, "distance_text", None)
+    distance_km = getattr(event, "distance_km", None)
+
+    if raw_text in {"storm overhead", "out of range", "distance unavailable"}:
+        return raw_text
+    if distance_km is None:
+        return raw_text or "distance unavailable"
+    if config.alerts.distance_unit == "mi":
+        distance_mi = distance_km * 0.621371
+        rounded = round(distance_mi)
+        if abs(distance_mi - rounded) < 0.05:
+            return f"{rounded} mi"
+        return f"{distance_mi:.1f}".rstrip("0").rstrip(".") + " mi"
+    return f"{distance_km} km"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="AS3935 to MeshCore TCP alert bridge")
     parser.add_argument(
@@ -110,7 +127,7 @@ def format_alert_message(config: AppConfig, event) -> str:
         return config.alerts.lightning_message_template.format_map(
             SafeFormatDict(
                 prefix=prefix,
-                distance=event.distance_text or "distance unavailable",
+                distance=format_distance_text(config, event),
                 energy=event.energy if event.energy is not None else "unknown",
                 interrupt_code=f"0x{event.interrupt_code:02X}",
                 kind=event.kind,

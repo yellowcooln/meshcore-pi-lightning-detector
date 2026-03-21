@@ -87,6 +87,7 @@ class AlertSettings:
     send_noise_messages: bool
     send_disturber_messages: bool
     message_prefix: str
+    distance_unit: str
     lightning_message_template: str
 
 
@@ -159,6 +160,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
         send_noise_messages=bool(alerts_raw.get("send_noise_messages", False)),
         send_disturber_messages=bool(alerts_raw.get("send_disturber_messages", False)),
         message_prefix=str(alerts_raw.get("message_prefix", "AS3935")).strip(),
+        distance_unit=str(alerts_raw.get("distance_unit", "km")).strip().lower(),
         lightning_message_template=str(
             alerts_raw.get(
                 "lightning_message_template",
@@ -202,3 +204,5 @@ def _validate_config(
         raise ValueError("sensor.poll_interval_seconds must be greater than 0")
     if alerts.cooldown_seconds < 0:
         raise ValueError("alerts.cooldown_seconds must be zero or greater")
+    if alerts.distance_unit not in {"km", "mi"}:
+        raise ValueError("alerts.distance_unit must be 'km' or 'mi'")

@@ -78,6 +78,49 @@ class ConfigTests(unittest.TestCase):
             config = load_config(config_path)
             self.assertIsNone(config.sensor.i2c_address)
 
+    def test_distance_unit_defaults_to_km(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    """
+                ).strip()
+            )
+            config = load_config(config_path)
+            self.assertEqual(config.alerts.distance_unit, "km")
+
+    def test_distance_unit_must_be_km_or_mi(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    distance_unit = "yards"
+                    """
+                ).strip()
+            )
+            with self.assertRaisesRegex(ValueError, "alerts.distance_unit"):
+                load_config(config_path)
+
 
 if __name__ == "__main__":
     unittest.main()
