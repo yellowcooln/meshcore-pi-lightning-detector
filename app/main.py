@@ -6,6 +6,7 @@ from dataclasses import replace
 import logging
 import signal
 import time
+from datetime import datetime
 
 from app.as3935 import AS3935
 from app.config import AppConfig, DEFAULT_CONFIG_PATH, load_config
@@ -105,6 +106,7 @@ def format_alert_message(config: AppConfig, event) -> str:
             def __missing__(self, key):
                 return "{" + key + "}"
 
+        event_time = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
         return config.alerts.lightning_message_template.format_map(
             SafeFormatDict(
                 prefix=prefix,
@@ -112,6 +114,7 @@ def format_alert_message(config: AppConfig, event) -> str:
                 energy=event.energy if event.energy is not None else "unknown",
                 interrupt_code=f"0x{event.interrupt_code:02X}",
                 kind=event.kind,
+                time=event_time,
             )
         )
     if event.kind == "noise":

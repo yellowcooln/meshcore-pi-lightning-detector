@@ -99,7 +99,7 @@ Reconfigure the lightning alert message template:
 sudo bash manage.sh setup
 ```
 
-`setup` offers preset message styles and only asks for a full template if you choose the custom option.
+`setup` offers preset message styles and only asks for a full template if you choose the custom option. One preset example is `lightning detected at {time}`.
 
 Run the monitor interactively:
 
@@ -123,6 +123,7 @@ python -m unittest discover -s tests -v
 
 - The app reconfigures the target channel before sends by default.
 - By default, the sensor address is set to `i2c_address = "auto"` and the app will try the common AS3935 I2C addresses on startup.
+- Default lightning message templates no longer include the app prefix, because MeshCore already shows the sender node name on channel messages.
 - Lightning alerts are rate-limited by `alerts.cooldown_seconds`.
 - Noise and disturber events are logged and can optionally be sent as messages.
 - `config.toml` is local deployment state and is intentionally ignored by git.

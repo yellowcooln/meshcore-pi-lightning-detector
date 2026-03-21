@@ -154,11 +154,12 @@ Available placeholders in the template are:
 - `{energy}`
 - `{interrupt_code}`
 - `{kind}`
+- `{time}`
 
 Example:
 
 ```text
-{prefix}: strike at {distance} with energy {energy}
+lightning detected at {time}
 ```
 
 ## 10. Notes
@@ -203,7 +204,7 @@ The installer writes `config.toml` for you. You usually only need to change the 
 - `send_noise_messages`: When `true`, noise interrupts are also sent as channel messages.
 - `send_disturber_messages`: When `true`, disturber events are also sent as channel messages.
 - `message_prefix`: Prefix added to outbound alert text.
-- `lightning_message_template`: Template for the actual lightning alert text. Supports `{prefix}`, `{distance}`, `{energy}`, `{interrupt_code}`, and `{kind}`.
+- `lightning_message_template`: Template for the actual lightning alert text. Supports `{prefix}`, `{distance}`, `{energy}`, `{interrupt_code}`, `{kind}`, and `{time}`. The current defaults do not include the prefix because the MeshCore sender name is already present on channel messages.
 
 ### `[logging]`
 
