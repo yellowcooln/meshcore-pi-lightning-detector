@@ -89,9 +89,9 @@ ls /dev/i2c-1
 i2cdetect -y 1
 ```
 
-Use `manage.sh` as the primary install path. It creates the virtual environment inside this project folder, installs the app into that environment, creates `config.toml` if needed, and installs the `systemd` service.
+Use `manage.sh` as the primary install path. It creates the virtual environment inside this project folder, installs the app into that environment, asks for the MeshCore host, port, channel name, and optional channel key, writes those settings into `config.toml`, and installs the `systemd` service.
 
-If you run `./manage.sh` with no arguments, it lists the available commands. The script is non-interactive and prints stage-by-stage progress while it works.
+If you run `./manage.sh` with no arguments, it lists the available commands. `install` prompts for MeshCore connection details, and all commands print stage-by-stage progress while they work.
 
 ```bash
 chmod +x manage.sh
@@ -100,7 +100,7 @@ sudo ./manage.sh install
 
 ## Configuration
 
-Edit `config.toml`.
+Review `config.toml` after install if you want to adjust sensor or alert settings beyond the prompted MeshCore values.
 
 ### pyMC Companion Setup
 
@@ -140,7 +140,7 @@ channel_name = "lightning-private"
 channel_key = "00112233445566778899AABBCCDDEEFF"
 ```
 
-After editing `config.toml`, start the service:
+After install, start the service:
 
 ```bash
 sudo ./manage.sh start

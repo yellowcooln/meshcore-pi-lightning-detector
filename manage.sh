@@ -10,6 +10,7 @@ EXAMPLE_CONFIG_PATH="${SCRIPT_DIR}/config.example.toml"
 RUN_USER="${SUDO_USER:-$USER}"
 RUN_GROUP="$(id -gn "${RUN_USER}")"
 SUPPLEMENTARY_GROUPS_LINE=""
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 if getent group i2c >/dev/null 2>&1; then
   SUPPLEMENTARY_GROUPS_LINE="SupplementaryGroups=i2c"
@@ -39,6 +40,14 @@ info() {
   echo "  - $1"
 }
 
+run_as_owner() {
+  if [[ "${EUID}" -eq 0 && "${RUN_USER}" != "root" ]]; then
+    sudo -u "${RUN_USER}" -H "$@"
+  else
+    "$@"
+  fi
+}
+
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing required command: $1" >&2
@@ -56,28 +65,182 @@ ensure_root_tools() {
 
 ensure_python_env() {
   stage "Preparing Python environment"
-  need_cmd python3
+  need_cmd "${PYTHON_BIN}"
   if [[ ! -d "${VENV_PATH}" ]]; then
     info "Creating virtual environment at ${VENV_PATH}"
-    python3 -m venv "${VENV_PATH}"
+    run_as_owner "${PYTHON_BIN}" -m venv "${VENV_PATH}"
   else
     info "Reusing existing virtual environment at ${VENV_PATH}"
   fi
   info "Upgrading pip"
-  "${VENV_PATH}/bin/pip" install --upgrade pip
+  run_as_owner "${VENV_PATH}/bin/pip" install --upgrade pip
   info "Installing project into the virtual environment"
-  "${VENV_PATH}/bin/pip" install -e "${SCRIPT_DIR}"
+  run_as_owner "${VENV_PATH}/bin/pip" install -e "${SCRIPT_DIR}"
 }
 
 ensure_config() {
   stage "Checking project configuration"
   if [[ ! -f "${CONFIG_PATH}" ]]; then
     info "Creating ${CONFIG_PATH} from ${EXAMPLE_CONFIG_PATH}"
-    cp "${EXAMPLE_CONFIG_PATH}" "${CONFIG_PATH}"
+    run_as_owner cp "${EXAMPLE_CONFIG_PATH}" "${CONFIG_PATH}"
     echo "Created ${CONFIG_PATH} from example. Edit it before starting the service."
   else
     info "Using existing config at ${CONFIG_PATH}"
   fi
+}
+
+read_config_value() {
+  local file="$1"
+  local section="$2"
+  local key="$3"
+  "${PYTHON_BIN}" - "$file" "$section" "$key" <<'PY'
+import sys, tomllib
+
+path, section, key = sys.argv[1:4]
+with open(path, "rb") as handle:
+    data = tomllib.load(handle)
+value = data[section][key]
+print(value)
+PY
+}
+
+prompt_with_default() {
+  local prompt_text="$1"
+  local default_value="$2"
+  local result=""
+  read -r -p "${prompt_text} [${default_value}]: " result
+  if [[ -z "${result}" ]]; then
+    result="${default_value}"
+  fi
+  printf '%s' "${result}"
+}
+
+prompt_optional_with_default() {
+  local prompt_text="$1"
+  local default_value="$2"
+  local result=""
+  if [[ -n "${default_value}" ]]; then
+    read -r -p "${prompt_text} [${default_value}]: " result
+    if [[ -z "${result}" ]]; then
+      result="${default_value}"
+    fi
+  else
+    read -r -p "${prompt_text} (leave blank for hashtag/public-style rooms): " result
+  fi
+  printf '%s' "${result}"
+}
+
+collect_meshcore_settings() {
+  stage "Collecting MeshCore connection settings"
+
+  local source_path="${CONFIG_PATH}"
+  if [[ ! -f "${source_path}" ]]; then
+    source_path="${EXAMPLE_CONFIG_PATH}"
+  fi
+
+  local default_host default_port default_channel_name default_channel_key
+  default_host="$(read_config_value "${source_path}" meshcore host)"
+  default_port="$(read_config_value "${source_path}" meshcore port)"
+  default_channel_name="$(read_config_value "${source_path}" meshcore channel_name)"
+  default_channel_key="$(read_config_value "${source_path}" meshcore channel_key)"
+
+  MESHCORE_HOST="$(prompt_with_default "MeshCore TCP host or IP" "${default_host}")"
+  MESHCORE_PORT="$(prompt_with_default "MeshCore TCP port" "${default_port}")"
+  MESHCORE_CHANNEL_NAME="$(prompt_with_default "Channel name" "${default_channel_name}")"
+  MESHCORE_CHANNEL_KEY="$(prompt_optional_with_default "Channel key" "${default_channel_key}")"
+
+  if [[ ! "${MESHCORE_PORT}" =~ ^[0-9]+$ ]] || [[ "${MESHCORE_PORT}" -lt 1 || "${MESHCORE_PORT}" -gt 65535 ]]; then
+    echo "Invalid port: ${MESHCORE_PORT}" >&2
+    exit 1
+  fi
+
+  if [[ -n "${MESHCORE_CHANNEL_KEY}" ]] && [[ ! "${MESHCORE_CHANNEL_KEY}" =~ ^[0-9A-Fa-f]{32}$ ]]; then
+    echo "Channel key must be exactly 32 hex characters when provided." >&2
+    exit 1
+  fi
+
+  if [[ ! "${MESHCORE_CHANNEL_NAME}" =~ ^# ]] && [[ -z "${MESHCORE_CHANNEL_KEY}" ]]; then
+    echo "Private channels require a channel key, or use a name that starts with #." >&2
+    exit 1
+  fi
+
+  info "Host: ${MESHCORE_HOST}"
+  info "Port: ${MESHCORE_PORT}"
+  info "Channel: ${MESHCORE_CHANNEL_NAME}"
+  if [[ -n "${MESHCORE_CHANNEL_KEY}" ]]; then
+    info "Channel key: provided"
+  else
+    info "Channel key: derived from channel name"
+  fi
+}
+
+write_meshcore_config() {
+  stage "Writing MeshCore settings to config.toml"
+  info "Updating [meshcore] settings in ${CONFIG_PATH}"
+  run_as_owner env \
+    CONFIG_PATH="${CONFIG_PATH}" \
+    EXAMPLE_CONFIG_PATH="${EXAMPLE_CONFIG_PATH}" \
+    MESHCORE_HOST="${MESHCORE_HOST}" \
+    MESHCORE_PORT="${MESHCORE_PORT}" \
+    MESHCORE_CHANNEL_NAME="${MESHCORE_CHANNEL_NAME}" \
+    MESHCORE_CHANNEL_KEY="${MESHCORE_CHANNEL_KEY}" \
+    "${PYTHON_BIN}" - <<'PY'
+import os
+import tomllib
+from pathlib import Path
+
+config_path = Path(os.environ["CONFIG_PATH"])
+example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
+source_path = config_path if config_path.exists() else example_path
+
+with source_path.open("rb") as handle:
+    data = tomllib.load(handle)
+
+data["meshcore"]["host"] = os.environ["MESHCORE_HOST"]
+data["meshcore"]["port"] = int(os.environ["MESHCORE_PORT"])
+data["meshcore"]["channel_name"] = os.environ["MESHCORE_CHANNEL_NAME"]
+data["meshcore"]["channel_key"] = os.environ["MESHCORE_CHANNEL_KEY"].upper()
+
+def dump_bool(value: bool) -> str:
+    return "true" if value else "false"
+
+lines = [
+    "[meshcore]",
+    f'host = "{data["meshcore"]["host"]}"',
+    f'port = {data["meshcore"]["port"]}',
+    f'channel_name = "{data["meshcore"]["channel_name"]}"',
+    f'channel_key = "{data["meshcore"]["channel_key"]}"',
+    f'channel_slot = {data["meshcore"]["channel_slot"]}',
+    f'always_configure_channel = {dump_bool(data["meshcore"]["always_configure_channel"])}',
+    f'connect_timeout_seconds = {data["meshcore"]["connect_timeout_seconds"]}',
+    "",
+    "[sensor]",
+    f'i2c_bus = {data["sensor"]["i2c_bus"]}',
+    f'i2c_address = "{data["sensor"]["i2c_address"]}"',
+    f'indoor = {dump_bool(data["sensor"]["indoor"])}',
+    f'noise_floor = {data["sensor"]["noise_floor"]}',
+    f'watchdog_threshold = {data["sensor"]["watchdog_threshold"]}',
+    f'spike_rejection = {data["sensor"]["spike_rejection"]}',
+    f'minimum_lightnings = {data["sensor"]["minimum_lightnings"]}',
+    f'mask_disturbers = {dump_bool(data["sensor"]["mask_disturbers"])}',
+    f'reset_defaults_on_start = {dump_bool(data["sensor"]["reset_defaults_on_start"])}',
+    f'calibrate_on_start = {dump_bool(data["sensor"]["calibrate_on_start"])}',
+    f'clear_statistics_on_start = {dump_bool(data["sensor"]["clear_statistics_on_start"])}',
+    f'poll_interval_seconds = {data["sensor"]["poll_interval_seconds"]}',
+    "",
+    "[alerts]",
+    f'cooldown_seconds = {data["alerts"]["cooldown_seconds"]}',
+    f'send_noise_messages = {dump_bool(data["alerts"]["send_noise_messages"])}',
+    f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
+    f'message_prefix = "{data["alerts"]["message_prefix"]}"',
+    "",
+    "[logging]",
+    f'level = "{data["logging"]["level"]}"',
+    "",
+]
+
+config_path.write_text("\n".join(lines), encoding="utf-8")
+PY
 }
 
 report_i2c_status() {
@@ -125,12 +288,14 @@ install_app() {
   stage "Installing MeshCore Pi Lightning Detector"
   ensure_python_env
   ensure_config
+  collect_meshcore_settings
+  write_meshcore_config
   install_service_file
   report_i2c_status
   echo
   echo "Install complete."
   echo "Next steps:"
-  echo "  1. Edit ${CONFIG_PATH}"
+  echo "  1. Review ${CONFIG_PATH}"
   echo "  2. If /dev/i2c-1 is missing, enable I2C on the Pi and reboot"
   echo "  3. Run: ./manage.sh start"
 }
