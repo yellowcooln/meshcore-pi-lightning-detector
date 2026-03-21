@@ -146,6 +146,7 @@ After install, start the service:
 sudo ./manage.sh start
 sudo ./manage.sh status
 sudo ./manage.sh test
+sudo ./manage.sh send "Lightning detector manual message test"
 sudo ./manage.sh logs
 ```
 
@@ -155,6 +156,7 @@ Other service commands:
 sudo ./manage.sh stop
 sudo ./manage.sh restart
 sudo ./manage.sh test
+sudo ./manage.sh send "Hello from manage.sh"
 sudo ./manage.sh uninstall
 ```
 
@@ -179,6 +181,12 @@ Run the same probe through the project-managed virtualenv without activating `.v
 
 ```bash
 sudo ./manage.sh test
+```
+
+Send a custom message to the configured channel through the project-managed virtualenv:
+
+```bash
+sudo ./manage.sh send "Lightning detector manual message test"
 ```
 
 Run the monitor interactively:

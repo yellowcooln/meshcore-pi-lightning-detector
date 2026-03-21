@@ -27,6 +27,7 @@ Commands:
   restart    Restart the systemd service
   status     Show systemd service status
   test       Run a one-shot MeshCore verify/probe using the project virtualenv
+  send       Send a custom message to the configured channel
   logs       Tail service logs
   uninstall  Stop and remove the systemd service
 EOF
@@ -390,6 +391,20 @@ test_runtime() {
   run_as_owner "${VENV_PATH}/bin/meshcore-lightning" --config "${CONFIG_PATH}" verify-channel --send-probe
 }
 
+send_custom_message() {
+  if [[ $# -lt 1 ]]; then
+    echo "Usage: ./manage.sh send \"your message here\"" >&2
+    exit 1
+  fi
+
+  stage "Sending custom channel message"
+  ensure_runtime_ready
+  local message="$*"
+  info "Using ${CONFIG_PATH}"
+  info "Sending message to the configured channel"
+  run_as_owner "${VENV_PATH}/bin/meshcore-lightning" --config "${CONFIG_PATH}" send-test --message "${message}"
+}
+
 uninstall_service() {
   stage "Removing systemd service"
   ensure_root_tools
@@ -415,7 +430,7 @@ main() {
     exit 0
   fi
 
-  if [[ $# -ne 1 ]]; then
+  if [[ $# -lt 1 ]]; then
     usage
     exit 1
   fi
@@ -441,6 +456,10 @@ main() {
       ;;
     test)
       test_runtime
+      ;;
+    send)
+      shift
+      send_custom_message "$@"
       ;;
     logs)
       logs_service
