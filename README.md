@@ -60,9 +60,9 @@ That guide covers:
 - wiring the AS3935 to the PiMesh-1W `I2C / QT` port
 - enabling Raspberry Pi I2C only if needed
 - creating the companion in `pyMC`
-- running `sudo ./manage.sh install`
-- verifying the channel with `sudo ./manage.sh test`
-- sending a live outbound message with `sudo ./manage.sh send`
+- running `sudo bash manage.sh install`
+- verifying the channel with `sudo bash manage.sh test`
+- sending a live outbound message with `sudo bash manage.sh send`
 
 ## Useful Commands
 
@@ -82,14 +82,14 @@ meshcore-lightning --channel-name "#temporary-check" verify-channel --send-probe
 Verify that the configured channel can be loaded without sending a message:
 
 ```bash
-sudo ./manage.sh test
+sudo bash manage.sh test
 ```
 
 Send a message to the configured channel through the project-managed virtualenv:
 
 ```bash
-sudo ./manage.sh send
-sudo ./manage.sh send "Lightning detector manual message test"
+sudo bash manage.sh send
+sudo bash manage.sh send "Lightning detector manual message test"
 ```
 
 Run the monitor interactively:

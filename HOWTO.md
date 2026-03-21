@@ -82,8 +82,7 @@ The project also works with any reachable MeshCore TCP node if you are not using
 ## 6. Run The Installer
 
 ```bash
-chmod +x manage.sh
-sudo ./manage.sh install
+sudo bash manage.sh install
 ```
 
 The installer will:
@@ -106,36 +105,35 @@ If you just press Enter at the prompts on a fresh install, it uses the defaults:
 Start the service:
 
 ```bash
-sudo ./manage.sh start
-sudo ./manage.sh status
+sudo bash manage.sh start
 ```
 
 Verify the configured channel can be loaded without sending a message:
 
 ```bash
-sudo ./manage.sh test
+sudo bash manage.sh test
 ```
 
 Send an outbound message to the configured channel:
 
 ```bash
-sudo ./manage.sh send
-sudo ./manage.sh send "Lightning detector manual message test"
+sudo bash manage.sh send
+sudo bash manage.sh send "Lightning detector manual message test"
 ```
 
 Watch logs:
 
 ```bash
-sudo ./manage.sh logs
+sudo bash manage.sh logs
 ```
 
 ## 8. Common Service Commands
 
 ```bash
-sudo ./manage.sh stop
-sudo ./manage.sh restart
-sudo ./manage.sh disable
-sudo ./manage.sh uninstall
+sudo bash manage.sh stop
+sudo bash manage.sh restart
+sudo bash manage.sh disable
+sudo bash manage.sh uninstall
 ```
 
 ## 9. Notes
