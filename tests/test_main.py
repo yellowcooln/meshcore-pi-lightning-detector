@@ -130,7 +130,7 @@ class MainTests(unittest.TestCase):
                 send_noise_messages=False,
                 send_disturber_messages=False,
                 message_prefix="AS3935",
-                lightning_message_template="lightning detected at {time}",
+                lightning_message_template="lightning detected at {time} on {date}",
             ),
             logging=LoggingSettings(level="INFO"),
         )
@@ -146,6 +146,7 @@ class MainTests(unittest.TestCase):
         )()
         message = format_alert_message(config, event)
         self.assertTrue(message.startswith("lightning detected at "))
+        self.assertIn(" on ", message)
 
 
 if __name__ == "__main__":

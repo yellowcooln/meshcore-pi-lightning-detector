@@ -106,7 +106,7 @@ def format_alert_message(config: AppConfig, event) -> str:
             def __missing__(self, key):
                 return "{" + key + "}"
 
-        event_time = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+        now = datetime.now().astimezone()
         return config.alerts.lightning_message_template.format_map(
             SafeFormatDict(
                 prefix=prefix,
@@ -114,7 +114,10 @@ def format_alert_message(config: AppConfig, event) -> str:
                 energy=event.energy if event.energy is not None else "unknown",
                 interrupt_code=f"0x{event.interrupt_code:02X}",
                 kind=event.kind,
-                time=event_time,
+                time=now.strftime("%H:%M:%S"),
+                time24=now.strftime("%H:%M:%S"),
+                time12=now.strftime("%I:%M:%S %p"),
+                date=now.strftime("%Y-%m-%d"),
             )
         )
     if event.kind == "noise":

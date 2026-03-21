@@ -291,7 +291,7 @@ collect_alert_message_settings() {
       LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
       ;;
     5)
-      echo "  - Available placeholders: {prefix}, {distance}, {energy}, {interrupt_code}, {kind}, {time}"
+      echo "  - Available placeholders: {prefix}, {distance}, {energy}, {interrupt_code}, {kind}, {time}, {time24}, {time12}, {date}"
       LIGHTNING_MESSAGE_TEMPLATE="$(prompt_with_default "Custom lightning message template" "${default_lightning_template}")"
       ;;
     *)
@@ -491,7 +491,9 @@ if config_path.exists():
 
 template = data["alerts"]["lightning_message_template"]
 prefix = data["alerts"]["message_prefix"]
-sample_time = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+sample_date = datetime.now().astimezone().strftime("%Y-%m-%d")
+sample_time24 = datetime.now().astimezone().strftime("%H:%M:%S")
+sample_time12 = datetime.now().astimezone().strftime("%I:%M:%S %p")
 
 class SafeFormatDict(dict):
     def __missing__(self, key):
@@ -504,7 +506,10 @@ message = template.format_map(
         energy="12345",
         interrupt_code="0x08",
         kind="lightning",
-        time=sample_time,
+        time=sample_time24,
+        time24=sample_time24,
+        time12=sample_time12,
+        date=sample_date,
     )
 )
 

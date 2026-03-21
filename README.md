@@ -101,7 +101,7 @@ Reconfigure the lightning alert message template:
 sudo bash manage.sh setup
 ```
 
-`setup` offers preset message styles and only asks for a full template if you choose the custom option. The built-in styles now include time-based options such as `lightning detected at {time}` and `lightning detected at {time} | distance={distance} | energy={energy}`.
+`setup` offers preset message styles and only asks for a full template if you choose the custom option. The built-in styles now include time-based options such as `lightning detected at {time}` and `lightning detected at {time} | distance={distance} | energy={energy}`. Available time placeholders include `{time}`, `{time24}`, `{time12}`, and `{date}`.
 
 Run the monitor interactively:
 
