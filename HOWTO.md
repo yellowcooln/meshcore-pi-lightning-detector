@@ -17,19 +17,19 @@ Tested sensor module:
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
 By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
 
-For the tested board, use the standard 4-pin I2C header on the sensor board:
+For the tested board, use the sensor board's `CN1` header:
 
-- `GND`
-- `+3V3`
-- `SDA_3V`
-- `SCL_3V`
+- `1 GND`
+- `2 +3V3`
+- `3 SDA_3V`
+- `4 SCL_3V`
 
 Wire that to the PiMesh-1W `I2C / QT` port as:
 
-- `GND` -> `GND`
-- `+3V3` -> `3.3V`
-- `SDA_3V` -> `SDA`
-- `SCL_3V` -> `SCL`
+- `CN1 pin 1 GND` -> PiMesh `GND`
+- `CN1 pin 2 +3V3` -> PiMesh `3.3V`
+- `CN1 pin 3 SDA_3V` -> PiMesh `SDA`
+- `CN1 pin 4 SCL_3V` -> PiMesh `SCL`
 
 The tested board already presents the sensor in I2C form on that header, so you do not need to manually wire the raw `SI`, `CS`, `A0`, `A1`, or `EN` breakout pins for this setup.
 
