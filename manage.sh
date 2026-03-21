@@ -373,8 +373,12 @@ write_meshcore_config() {
     MESHCORE_CHANNEL_KEY="${MESHCORE_CHANNEL_KEY}" \
     "${PYTHON_BIN}" - <<'PY'
 import os
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 config_path = Path(os.environ["CONFIG_PATH"])
 example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
@@ -457,8 +461,12 @@ write_alert_message_config() {
     LIGHTNING_MESSAGE_TEMPLATE="${LIGHTNING_MESSAGE_TEMPLATE}" \
     "${PYTHON_BIN}" - <<'PY'
 import os
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 config_path = Path(os.environ["CONFIG_PATH"])
 example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
@@ -536,9 +544,13 @@ render_default_lightning_message() {
     EXAMPLE_CONFIG_PATH="${EXAMPLE_CONFIG_PATH}" \
     "${PYTHON_BIN}" - <<'PY'
 import os
-import tomllib
 from pathlib import Path
 from datetime import datetime
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 config_path = Path(os.environ["CONFIG_PATH"])
 example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
