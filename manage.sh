@@ -154,6 +154,27 @@ print(value)
 PY
 }
 
+read_config_value_with_fallback() {
+  local file="$1"
+  local fallback_file="$2"
+  local section="$3"
+  local key="$4"
+  "${PYTHON_BIN}" - "$file" "$fallback_file" "$section" "$key" <<'PY'
+import sys, tomllib
+
+path, fallback_path, section, key = sys.argv[1:5]
+
+with open(fallback_path, "rb") as handle:
+    fallback = tomllib.load(handle)
+
+with open(path, "rb") as handle:
+    data = tomllib.load(handle)
+
+value = data.get(section, {}).get(key, fallback[section][key])
+print(value)
+PY
+}
+
 prompt_with_default() {
   local prompt_text="$1"
   local default_value="$2"
@@ -189,10 +210,10 @@ collect_meshcore_settings() {
   fi
 
   local default_host default_port default_channel_name default_channel_key
-  default_host="$(read_config_value "${source_path}" meshcore host)"
-  default_port="$(read_config_value "${source_path}" meshcore port)"
-  default_channel_name="$(read_config_value "${source_path}" meshcore channel_name)"
-  default_channel_key="$(read_config_value "${source_path}" meshcore channel_key)"
+  default_host="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" meshcore host)"
+  default_port="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" meshcore port)"
+  default_channel_name="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" meshcore channel_name)"
+  default_channel_key="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" meshcore channel_key)"
 
   MESHCORE_HOST="$(prompt_with_default "MeshCore TCP host or IP" "${default_host}")"
   MESHCORE_PORT="$(prompt_with_default "MeshCore TCP port" "${default_port}")"
@@ -233,7 +254,7 @@ collect_alert_message_settings() {
   fi
 
   local default_lightning_template
-  default_lightning_template="$(read_config_value "${source_path}" alerts lightning_message_template)"
+  default_lightning_template="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts lightning_message_template)"
 
   LIGHTNING_MESSAGE_TEMPLATE="$(prompt_with_default "Lightning message template" "${default_lightning_template}")"
 
@@ -259,8 +280,17 @@ config_path = Path(os.environ["CONFIG_PATH"])
 example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
 source_path = config_path if config_path.exists() else example_path
 
-with source_path.open("rb") as handle:
+with example_path.open("rb") as handle:
     data = tomllib.load(handle)
+
+if source_path != example_path:
+    with source_path.open("rb") as handle:
+        current = tomllib.load(handle)
+    for section, values in current.items():
+        if isinstance(values, dict) and isinstance(data.get(section), dict):
+            data[section].update(values)
+        else:
+            data[section] = values
 
 data["meshcore"]["host"] = os.environ["MESHCORE_HOST"]
 data["meshcore"]["port"] = int(os.environ["MESHCORE_PORT"])
@@ -330,8 +360,17 @@ config_path = Path(os.environ["CONFIG_PATH"])
 example_path = Path(os.environ["EXAMPLE_CONFIG_PATH"])
 source_path = config_path if config_path.exists() else example_path
 
-with source_path.open("rb") as handle:
+with example_path.open("rb") as handle:
     data = tomllib.load(handle)
+
+if source_path != example_path:
+    with source_path.open("rb") as handle:
+        current = tomllib.load(handle)
+    for section, values in current.items():
+        if isinstance(values, dict) and isinstance(data.get(section), dict):
+            data[section].update(values)
+        else:
+            data[section] = values
 
 data["alerts"]["lightning_message_template"] = os.environ["LIGHTNING_MESSAGE_TEMPLATE"]
 
