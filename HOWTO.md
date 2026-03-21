@@ -10,10 +10,6 @@ Start-to-finish setup for the current stack:
 
 Connect the AS3935 breakout to the PiMesh-1W `I2C / QT` port.
 
-Board reference:
-
-![PiMesh-1W board layout](https://meshsmith.net/pimesh/base.png)
-
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
 By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
 

@@ -29,8 +29,6 @@ Primary target hardware is the MeshSmith PiMesh-1W. The I2C assumptions in this 
 
 On the PiMesh-1W, the AS3935 should connect to the board's `I2C / QT` port.
 
-![PiMesh-1W board layout](https://meshsmith.net/pimesh/base.png)
-
 If you need to map that back to the underlying Raspberry Pi header, the I2C lines are:
 
 - `3V3`: pin `1` or `17`
