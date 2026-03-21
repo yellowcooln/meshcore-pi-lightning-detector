@@ -270,9 +270,10 @@ collect_alert_message_settings() {
   info "Choose a lightning message style:"
   echo "    1) Keep current setting"
   echo "    2) Detailed: lightning detected at {time} | distance={distance} | energy={energy}"
-  echo "    3) Short: lightning detected at {time}"
-  echo "    4) Minimal: lightning detected at {time}"
-  echo "    5) Custom template"
+  echo "    3) Time only: lightning detected at {time}"
+  echo "    4) Time and date: lightning detected at {time12} on {date}"
+  echo "    5) Minimal: lightning detected"
+  echo "    6) Custom template"
 
   local template_choice
   template_choice="$(prompt_choice_with_default "Select an option" "1")"
@@ -288,9 +289,12 @@ collect_alert_message_settings() {
       LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
       ;;
     4)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
+      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time12} on {date}"
       ;;
     5)
+      LIGHTNING_MESSAGE_TEMPLATE="lightning detected"
+      ;;
+    6)
       echo "  - Available placeholders: {prefix}, {distance}, {energy}, {interrupt_code}, {kind}, {time}, {time24}, {time12}, {date}"
       LIGHTNING_MESSAGE_TEMPLATE="$(prompt_with_default "Custom lightning message template" "${default_lightning_template}")"
       ;;
