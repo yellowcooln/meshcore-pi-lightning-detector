@@ -50,15 +50,11 @@ If your breakout exposes Qwiic / STEMMA QT, it should plug into that PiMesh-1W `
 - `config.example.toml`: deployment template
 - `tests/`: unit tests
 
-## Local Setup
+## Main Setup
 
 ```bash
-cd /path/to/meshcore-pi-lightning-detector
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -e .
-cp config.example.toml config.toml
-python -m unittest discover -s tests -v
+git clone https://github.com/yellowcooln/meshcore-pi-lightning-detector.git
+cd meshcore-pi-lightning-detector
 ```
 
 ## Raspberry Pi Setup
@@ -91,6 +87,13 @@ Confirm the bus and sensor:
 ```bash
 ls /dev/i2c-1
 i2cdetect -y 1
+```
+
+Use `manage.sh` as the primary install path. It creates the virtual environment inside this project folder, installs the app into that environment, creates `config.toml` if needed, and installs the `systemd` service.
+
+```bash
+chmod +x manage.sh
+sudo ./manage.sh install
 ```
 
 ## Configuration
@@ -135,14 +138,7 @@ channel_name = "lightning-private"
 channel_key = "00112233445566778899AABBCCDDEEFF"
 ```
 
-## Service Install
-
-```bash
-chmod +x manage.sh
-sudo ./manage.sh install
-```
-
-Then edit `config.toml` and start the service:
+After editing `config.toml`, start the service:
 
 ```bash
 sudo ./manage.sh start
@@ -179,6 +175,18 @@ Run the monitor interactively:
 
 ```bash
 meshcore-lightning monitor
+```
+
+## Local Setup
+
+If you want to work on the code manually instead of using the service flow:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -e .
+cp config.example.toml config.toml
+python -m unittest discover -s tests -v
 ```
 
 ## Behavior Notes
