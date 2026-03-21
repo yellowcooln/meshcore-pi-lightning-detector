@@ -63,12 +63,12 @@ For the tested board, the connector you actually use is the separate 4-pin I2C h
 - `SDA_3V`
 - `SCL_3V`
 
-So the working wiring to the PiMesh-1W `I2C / QT` side is just:
+So the working wiring to the PiMesh-1W `I2C / QT` header is just:
 
-- `GND` -> PiMesh `GND`
-- `+3V3` -> PiMesh `3.3V`
-- `SDA_3V` -> PiMesh `SDA`
-- `SCL_3V` -> PiMesh `SCL`
+- sensor `GND` -> PiMesh `GND`
+- sensor `+3V3` -> PiMesh `+3V3`
+- sensor `SDA_3V` -> PiMesh `SDA_3V`
+- sensor `SCL_3V` -> PiMesh `SCL_3V`
 
 The lower-level AS3935 mode/address handling is already taken care of by that tested board variant and its 4-pin I2C breakout, so the app only needs the 4 I2C pins above.
 

@@ -38,12 +38,12 @@ For the tested board, use the separate 4-pin I2C header on the sensor board:
 - `SDA_3V`
 - `SCL_3V`
 
-Wire that to the PiMesh-1W `I2C / QT` port as:
+Wire that to the PiMesh-1W `I2C / QT` header as:
 
-- `GND` -> PiMesh `GND`
-- `+3V3` -> PiMesh `3.3V`
-- `SDA_3V` -> PiMesh `SDA`
-- `SCL_3V` -> PiMesh `SCL`
+- sensor `GND` -> PiMesh `GND`
+- sensor `+3V3` -> PiMesh `+3V3`
+- sensor `SDA_3V` -> PiMesh `SDA_3V`
+- sensor `SCL_3V` -> PiMesh `SCL_3V`
 
 The tested board already presents the sensor in I2C form on that header, so you do not need to manually wire the raw `SI`, `CS`, `EN-V`, `MOSI`, `SCL`, `GND`, or `VCC` breakout pins for this setup.
 
