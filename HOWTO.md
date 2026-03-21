@@ -74,7 +74,7 @@ This project is intended to connect to the MeshCore companion feature inside `py
 
 Typical same-host setup:
 
-- host: `127.0.0.1`
+- host: `0.0.0.0`
 - port: `5000`
 
 The project also works with any reachable MeshCore TCP node if you are not using local `pyMC`.
