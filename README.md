@@ -155,6 +155,7 @@ Other service commands:
 ```bash
 sudo ./manage.sh stop
 sudo ./manage.sh restart
+sudo ./manage.sh disable
 sudo ./manage.sh test
 sudo ./manage.sh send "Hello from manage.sh"
 sudo ./manage.sh uninstall

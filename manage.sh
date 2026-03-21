@@ -28,6 +28,7 @@ Commands:
   status     Show systemd service status
   test       Verify the configured channel can be loaded without sending a message
   send       Send a custom message to the configured channel
+  disable    Disable service autostart without uninstalling the service
   logs       Tail service logs
   uninstall  Stop and remove the systemd service
 EOF
@@ -383,6 +384,13 @@ logs_service() {
   sudo journalctl -u "${SERVICE_NAME}" -n 100 -f
 }
 
+disable_service() {
+  stage "Disabling service autostart"
+  ensure_root_tools
+  info "Disabling ${SERVICE_NAME}"
+  sudo systemctl disable "${SERVICE_NAME}"
+}
+
 test_runtime() {
   stage "Verifying configured channel"
   ensure_runtime_ready
@@ -458,6 +466,9 @@ main() {
     send)
       shift
       send_custom_message "$@"
+      ;;
+    disable)
+      disable_service
       ;;
     logs)
       logs_service
