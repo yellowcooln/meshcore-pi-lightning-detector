@@ -392,14 +392,12 @@ test_runtime() {
 }
 
 send_custom_message() {
-  if [[ $# -lt 1 ]]; then
-    echo "Usage: ./manage.sh send \"your message here\"" >&2
-    exit 1
-  fi
-
   stage "Sending custom channel message"
   ensure_runtime_ready
-  local message="$*"
+  local message="MeshCore Pi Lightning Detector manual send test"
+  if [[ $# -ge 1 ]]; then
+    message="$*"
+  fi
   info "Using ${CONFIG_PATH}"
   info "Sending message to the configured channel"
   run_as_owner "${VENV_PATH}/bin/meshcore-lightning" --config "${CONFIG_PATH}" send-test --message "${message}"

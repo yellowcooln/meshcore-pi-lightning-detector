@@ -186,6 +186,7 @@ sudo ./manage.sh test
 Send a custom message to the configured channel through the project-managed virtualenv:
 
 ```bash
+sudo ./manage.sh send
 sudo ./manage.sh send "Lightning detector manual message test"
 ```
 
