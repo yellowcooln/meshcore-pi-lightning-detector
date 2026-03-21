@@ -1,0 +1,1 @@
+"""MeshCore lightning monitor package."""

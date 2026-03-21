@@ -1,0 +1,31 @@
+[meshcore]
+host = "192.168.30.52"
+port = 5002
+channel_name = "#lightning"
+channel_key = ""
+channel_slot = 0
+always_configure_channel = true
+connect_timeout_seconds = 10.0
+
+[sensor]
+i2c_bus = 1
+i2c_address = "0x03"
+indoor = true
+noise_floor = 2
+watchdog_threshold = 1
+spike_rejection = 2
+minimum_lightnings = 1
+mask_disturbers = true
+reset_defaults_on_start = false
+calibrate_on_start = true
+clear_statistics_on_start = true
+poll_interval_seconds = 0.1
+
+[alerts]
+cooldown_seconds = 60
+send_noise_messages = false
+send_disturber_messages = false
+message_prefix = "AS3935"
+
+[logging]
+level = "INFO"

@@ -1,0 +1,17 @@
+[project]
+name = "meshcore-lightning-app"
+version = "0.1.0"
+description = "AS3935 lightning monitor that posts alerts to a MeshCore channel over TCP"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "meshcore==2.3.1",
+    "smbus2>=0.4.3",
+]
+
+[project.scripts]
+meshcore-lightning = "app.main:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
