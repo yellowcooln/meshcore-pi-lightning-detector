@@ -30,6 +30,15 @@ Commands:
 EOF
 }
 
+stage() {
+  echo
+  echo "==> $1"
+}
+
+info() {
+  echo "  - $1"
+}
+
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing required command: $1" >&2
@@ -46,22 +55,33 @@ ensure_root_tools() {
 }
 
 ensure_python_env() {
+  stage "Preparing Python environment"
   need_cmd python3
   if [[ ! -d "${VENV_PATH}" ]]; then
+    info "Creating virtual environment at ${VENV_PATH}"
     python3 -m venv "${VENV_PATH}"
+  else
+    info "Reusing existing virtual environment at ${VENV_PATH}"
   fi
+  info "Upgrading pip"
   "${VENV_PATH}/bin/pip" install --upgrade pip
+  info "Installing project into the virtual environment"
   "${VENV_PATH}/bin/pip" install -e "${SCRIPT_DIR}"
 }
 
 ensure_config() {
+  stage "Checking project configuration"
   if [[ ! -f "${CONFIG_PATH}" ]]; then
+    info "Creating ${CONFIG_PATH} from ${EXAMPLE_CONFIG_PATH}"
     cp "${EXAMPLE_CONFIG_PATH}" "${CONFIG_PATH}"
     echo "Created ${CONFIG_PATH} from example. Edit it before starting the service."
+  else
+    info "Using existing config at ${CONFIG_PATH}"
   fi
 }
 
 report_i2c_status() {
+  stage "Checking Raspberry Pi I2C status"
   if [[ -e /dev/i2c-1 ]]; then
     echo "Detected /dev/i2c-1. Raspberry Pi I2C appears to be enabled."
   else
@@ -72,7 +92,9 @@ report_i2c_status() {
 }
 
 install_service_file() {
+  stage "Installing systemd service"
   ensure_root_tools
+  info "Writing ${SERVICE_PATH}"
   sudo tee "${SERVICE_PATH}" >/dev/null <<EOF
 [Unit]
 Description=MeshCore Lightning App
@@ -93,11 +115,14 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF
+  info "Reloading systemd daemon"
   sudo systemctl daemon-reload
+  info "Enabling ${SERVICE_NAME}"
   sudo systemctl enable "${SERVICE_NAME}"
 }
 
 install_app() {
+  stage "Installing MeshCore Pi Lightning Detector"
   ensure_python_env
   ensure_config
   install_service_file
@@ -111,40 +136,53 @@ install_app() {
 }
 
 start_service() {
+  stage "Starting service"
   ensure_root_tools
+  info "Starting ${SERVICE_NAME}"
   sudo systemctl start "${SERVICE_NAME}"
   sudo systemctl --no-pager --full status "${SERVICE_NAME}"
 }
 
 stop_service() {
+  stage "Stopping service"
   ensure_root_tools
+  info "Stopping ${SERVICE_NAME}"
   sudo systemctl stop "${SERVICE_NAME}"
 }
 
 restart_service() {
+  stage "Restarting service"
   ensure_root_tools
+  info "Restarting ${SERVICE_NAME}"
   sudo systemctl restart "${SERVICE_NAME}"
   sudo systemctl --no-pager --full status "${SERVICE_NAME}"
 }
 
 status_service() {
+  stage "Service status"
   ensure_root_tools
   sudo systemctl --no-pager --full status "${SERVICE_NAME}"
 }
 
 logs_service() {
+  stage "Tailing service logs"
   ensure_root_tools
   sudo journalctl -u "${SERVICE_NAME}" -n 100 -f
 }
 
 uninstall_service() {
+  stage "Removing systemd service"
   ensure_root_tools
   if sudo systemctl list-unit-files | grep -q "^${SERVICE_NAME}"; then
+    info "Stopping ${SERVICE_NAME} if it is running"
     sudo systemctl stop "${SERVICE_NAME}" || true
+    info "Disabling ${SERVICE_NAME}"
     sudo systemctl disable "${SERVICE_NAME}" || true
   fi
   if [[ -f "${SERVICE_PATH}" ]]; then
+    info "Removing ${SERVICE_PATH}"
     sudo rm -f "${SERVICE_PATH}"
+    info "Reloading systemd daemon"
     sudo systemctl daemon-reload
   fi
   echo "Removed ${SERVICE_NAME}."
@@ -152,12 +190,20 @@ uninstall_service() {
 }
 
 main() {
+  if [[ $# -eq 0 ]]; then
+    usage
+    exit 0
+  fi
+
   if [[ $# -ne 1 ]]; then
     usage
     exit 1
   fi
 
   case "$1" in
+    -h|--help|help)
+      usage
+      ;;
     install)
       install_app
       ;;

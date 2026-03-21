@@ -91,6 +91,8 @@ i2cdetect -y 1
 
 Use `manage.sh` as the primary install path. It creates the virtual environment inside this project folder, installs the app into that environment, creates `config.toml` if needed, and installs the `systemd` service.
 
+If you run `./manage.sh` with no arguments, it lists the available commands. The script is non-interactive and prints stage-by-stage progress while it works.
+
 ```bash
 chmod +x manage.sh
 sudo ./manage.sh install
