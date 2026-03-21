@@ -145,7 +145,7 @@ If you want to change the outbound lightning message after install, run:
 sudo bash manage.sh setup
 ```
 
-That command gives you preset message styles first and only asks for a full template if you choose the custom option. It then updates `config.toml`.
+That command gives you preset message styles first and only asks for a full template if you choose the custom option. The built-in presets include time-based formats such as `lightning detected at {time}` and `lightning detected at {time} | distance={distance} | energy={energy}`. It then updates `config.toml`.
 
 Available placeholders in the template are:
 

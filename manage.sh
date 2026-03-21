@@ -269,9 +269,9 @@ collect_alert_message_settings() {
 
   info "Choose a lightning message style:"
   echo "    1) Keep current setting"
-  echo "    2) Detailed: lightning detected | distance={distance} | energy={energy}"
+  echo "    2) Detailed: lightning detected at {time} | distance={distance} | energy={energy}"
   echo "    3) Short: lightning detected at {time}"
-  echo "    4) Minimal: lightning detected"
+  echo "    4) Minimal: lightning detected at {time}"
   echo "    5) Custom template"
 
   local template_choice
@@ -282,13 +282,13 @@ collect_alert_message_settings() {
       LIGHTNING_MESSAGE_TEMPLATE="${default_lightning_template}"
       ;;
     2)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected | distance={distance} | energy={energy}"
+      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time} | distance={distance} | energy={energy}"
       ;;
     3)
       LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
       ;;
     4)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected"
+      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
       ;;
     5)
       echo "  - Available placeholders: {prefix}, {distance}, {energy}, {interrupt_code}, {kind}, {time}"
