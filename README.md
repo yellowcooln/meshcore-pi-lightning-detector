@@ -53,6 +53,7 @@ If your breakout exposes Qwiic / STEMMA QT, it should plug into that PiMesh-1W `
 ## Local Setup
 
 ```bash
+cd /path/to/meshcore-pi-lightning-detector
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -e .
@@ -138,23 +139,23 @@ channel_key = "00112233445566778899AABBCCDDEEFF"
 
 ```bash
 chmod +x manage.sh
-./manage.sh install
+sudo ./manage.sh install
 ```
 
 Then edit `config.toml` and start the service:
 
 ```bash
-./manage.sh start
-./manage.sh status
-./manage.sh logs
+sudo ./manage.sh start
+sudo ./manage.sh status
+sudo ./manage.sh logs
 ```
 
 Other service commands:
 
 ```bash
-./manage.sh stop
-./manage.sh restart
-./manage.sh uninstall
+sudo ./manage.sh stop
+sudo ./manage.sh restart
+sudo ./manage.sh uninstall
 ```
 
 The installer creates `/etc/systemd/system/meshcore-lightning.service` and runs the monitor from this repo’s `.venv`.
