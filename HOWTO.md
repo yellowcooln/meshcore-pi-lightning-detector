@@ -62,6 +62,40 @@ Optional sensor check:
 i2cdetect -y 1
 ```
 
+If the app later logs:
+
+```text
+Set sensor.i2c_address explicitly in config.toml.
+```
+
+use `i2cdetect` to find the sensor address, then set it manually:
+
+```bash
+i2cdetect -y 1
+nano config.toml
+```
+
+Look for a device at one of the common AS3935 addresses:
+
+- `0x03`
+- `0x02`
+- `0x01`
+- `0x00`
+
+Then update the `[sensor]` section in `config.toml`:
+
+```toml
+[sensor]
+i2c_bus = 1
+i2c_address = "0x03"
+```
+
+After saving the file, restart the service:
+
+```bash
+sudo bash manage.sh restart
+```
+
 ## 5. Create A Companion In pyMC
 
 This project is intended to connect to the MeshCore companion feature inside `pyMC`.
@@ -179,6 +213,7 @@ Lightning detected at {time} on {date}
 - `send` is the outbound message test. Without an explicit message, it sends a sample rendered from the current lightning template.
 - `config.toml` is local deployment state and is git-ignored.
 - The service runs from this repo’s `.venv`.
+- If startup says `Set sensor.i2c_address explicitly in config.toml.`, run `i2cdetect -y 1`, set `[sensor].i2c_address` in `config.toml`, then `sudo bash manage.sh restart`.
 
 ## 11. config.toml Reference
 
