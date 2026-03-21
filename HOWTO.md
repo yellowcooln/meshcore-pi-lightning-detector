@@ -109,6 +109,12 @@ Start the service:
 sudo bash manage.sh start
 ```
 
+If you want to start the service and immediately follow the logs:
+
+```bash
+sudo bash manage.sh start logs
+```
+
 Verify the configured channel can be loaded without sending a message:
 
 ```bash

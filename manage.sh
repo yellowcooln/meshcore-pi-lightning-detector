@@ -23,7 +23,7 @@ Usage: ./manage.sh <command>
 Commands:
   install    Create/update venv, install app, install systemd service, enable service
   setup      Reconfigure alert message settings in config.toml
-  start      Start the systemd service
+  start      Start the systemd service; use "start logs" to tail logs immediately
   stop       Stop the systemd service
   restart    Restart the systemd service
   status     Show systemd service status
@@ -664,6 +664,11 @@ start_service() {
   sudo systemctl --no-pager --full status "${SERVICE_NAME}"
 }
 
+start_and_logs_service() {
+  start_service
+  logs_service
+}
+
 stop_service() {
   stage "Stopping service"
   ensure_root_tools
@@ -761,7 +766,11 @@ main() {
       setup_alerts
       ;;
     start)
-      start_service
+      if [[ "${2:-}" == "logs" ]]; then
+        start_and_logs_service
+      else
+        start_service
+      fi
       ;;
     stop)
       stop_service
