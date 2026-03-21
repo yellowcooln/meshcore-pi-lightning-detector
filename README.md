@@ -6,7 +6,7 @@ This project was made for and tested against the MeshSmith [PiMesh-1W](https://m
 
 Current defaults:
 
-- MeshCore TCP node: `192.168.30.52:5002`
+- MeshCore TCP companion listener: `0.0.0.0:5000`
 - Default room: `#lightning`
 - Raspberry Pi I2C bus: `/dev/i2c-1`
 
@@ -18,6 +18,8 @@ This project is meant to run unattended on a Pi as a small field service:
 - classify interrupts as lightning, noise, or disturber events
 - send alerts to a MeshCore channel
 - install cleanly as a `systemd` service with `manage.sh`
+
+The intended deployment model is to run this on the same device as the MeshCore radio and connect back to that node through the MeshCore companion TCP feature on `0.0.0.0:5000`. The app is not limited to that layout, though. It will also work with any reachable MeshCore TCP node.
 
 The MeshCore TCP send path and dynamic channel loading were verified against a live node. Hardware polling logic is implemented but still needs end-to-end validation on the final Pi plus sensor assembly.
 
