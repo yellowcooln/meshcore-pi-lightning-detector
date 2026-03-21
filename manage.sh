@@ -273,10 +273,10 @@ collect_alert_message_settings() {
 
   info "Choose a lightning message style:"
   echo "    1) Keep current setting"
-  echo "    2) Detailed: lightning detected at {time} | distance={distance} | energy={energy}"
-  echo "    3) Time only: lightning detected at {time}"
-  echo "    4) Time and date: lightning detected at {time} on {date}"
-  echo "    5) Minimal: lightning detected"
+  echo "    2) Detailed: Lightning detected at {time} | Distance={distance} | Energy={energy}"
+  echo "    3) Time only: Lightning detected at {time}"
+  echo "    4) Time and date: Lightning detected at {time} on {date}"
+  echo "    5) Minimal: Lightning detected"
   echo "    6) Custom template"
 
   local template_choice
@@ -287,16 +287,16 @@ collect_alert_message_settings() {
       LIGHTNING_MESSAGE_TEMPLATE="${default_lightning_template}"
       ;;
     2)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time} | distance={distance} | energy={energy}"
+      LIGHTNING_MESSAGE_TEMPLATE="Lightning detected at {time} | Distance={distance} | Energy={energy}"
       ;;
     3)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time}"
+      LIGHTNING_MESSAGE_TEMPLATE="Lightning detected at {time}"
       ;;
     4)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected at {time} on {date}"
+      LIGHTNING_MESSAGE_TEMPLATE="Lightning detected at {time} on {date}"
       ;;
     5)
-      LIGHTNING_MESSAGE_TEMPLATE="lightning detected"
+      LIGHTNING_MESSAGE_TEMPLATE="Lightning detected"
       ;;
     6)
       echo "  - Available placeholders: {prefix}, {distance}, {energy}, {interrupt_code}, {kind}, {time}, {time24}, {time12}, {date}"

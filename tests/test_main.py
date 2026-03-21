@@ -37,7 +37,7 @@ class MainTests(unittest.TestCase):
                 message_prefix="AS3935",
                 distance_unit="km",
                 time_format="24h",
-                lightning_message_template="lightning detected | distance={distance} | energy={energy}",
+                lightning_message_template="Lightning detected | Distance={distance} | Energy={energy}",
             ),
             logging=LoggingSettings(level="INFO"),
         )
@@ -54,7 +54,7 @@ class MainTests(unittest.TestCase):
         )()
         self.assertEqual(
             format_alert_message(config, event),
-            "lightning detected | distance=12 km | energy=12345",
+            "Lightning detected | Distance=12 km | Energy=12345",
         )
 
     def test_format_lightning_alert_uses_template(self) -> None:
@@ -138,7 +138,7 @@ class MainTests(unittest.TestCase):
                 message_prefix="AS3935",
                 distance_unit="km",
                 time_format="24h",
-                lightning_message_template="lightning detected at {time} on {date}",
+                lightning_message_template="Lightning detected at {time} on {date}",
             ),
             logging=LoggingSettings(level="INFO"),
         )
@@ -154,7 +154,7 @@ class MainTests(unittest.TestCase):
             },
         )()
         message = format_alert_message(config, event)
-        self.assertTrue(message.startswith("lightning detected at "))
+        self.assertTrue(message.startswith("Lightning detected at "))
         self.assertIn(" on ", message)
 
     def test_format_lightning_alert_supports_miles(self) -> None:
@@ -238,7 +238,7 @@ class MainTests(unittest.TestCase):
                 message_prefix="AS3935",
                 distance_unit="km",
                 time_format="12h",
-                lightning_message_template="lightning detected at {time}",
+                lightning_message_template="Lightning detected at {time}",
             ),
             logging=LoggingSettings(level="INFO"),
         )
@@ -254,7 +254,7 @@ class MainTests(unittest.TestCase):
             },
         )()
         message = format_alert_message(config, event)
-        self.assertRegex(message, r"lightning detected at \d{2}:\d{2}:\d{2} (AM|PM)")
+        self.assertRegex(message, r"Lightning detected at \d{2}:\d{2}:\d{2} (AM|PM)")
 
 
 if __name__ == "__main__":

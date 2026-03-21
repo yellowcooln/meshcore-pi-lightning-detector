@@ -166,7 +166,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
         lightning_message_template=str(
             alerts_raw.get(
                 "lightning_message_template",
-                "lightning detected at {time} | distance={distance} | energy={energy}",
+                "Lightning detected at {time} | Distance={distance} | Energy={energy}",
             )
         ).strip(),
     )

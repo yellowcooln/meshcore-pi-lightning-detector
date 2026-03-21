@@ -28,7 +28,7 @@ send_disturber_messages = false
 message_prefix = "AS3935"
 distance_unit = "km"
 time_format = "24h"
-lightning_message_template = "lightning detected at {time} | distance={distance} | energy={energy}"
+lightning_message_template = "Lightning detected at {time} | Distance={distance} | Energy={energy}"
 
 [logging]
 level = "INFO"
