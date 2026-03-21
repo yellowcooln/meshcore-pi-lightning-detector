@@ -17,23 +17,21 @@ Tested sensor module:
 This project assumes the Pi I2C bus is `/dev/i2c-1`.
 By default, the app uses `i2c_address = "auto"` and will try to guess the AS3935 address on that bus.
 
-For the tested `CJMCU-3935` board, use this I2C wiring:
+For the tested board, use the standard 4-pin I2C header on the sensor board:
 
-- `VCC` -> `3.3V`
+- `GND`
+- `+3V3`
+- `SDA_3V`
+- `SCL_3V`
+
+Wire that to the PiMesh-1W `I2C / QT` port as:
+
 - `GND` -> `GND`
-- `SCL` -> `SCL`
-- `MOSI` -> `SDA`
-- `SI` -> `3.3V`
-- `CS` -> `GND`
-- `A0` -> `3.3V`
-- `A1` -> `3.3V`
-- `EN` -> `3.3V`
+- `+3V3` -> `3.3V`
+- `SDA_3V` -> `SDA`
+- `SCL_3V` -> `SCL`
 
-Pins not used by the current app:
-
-- `MISO`
-- `AO`
-- `IRQ`
+The tested board already presents the sensor in I2C form on that header, so you do not need to manually wire the raw `SI`, `CS`, `A0`, `A1`, or `EN` breakout pins for this setup.
 
 ## 2. Clone The Repo
 

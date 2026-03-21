@@ -31,7 +31,7 @@ Tested sensor module:
 
 - AS3935 `CJMCU-3935` style breakout, purchased as: https://www.amazon.com/dp/B07SST5GDB
 
-On the PiMesh-1W, that AS3935 breakout should connect to the board's `I2C / QT` port, with the module strapped for I2C mode.
+On the PiMesh-1W, that AS3935 breakout should connect to the board's `I2C / QT` port through the standard 4-pin I2C header used on the tested board.
 
 If you need to map that back to the underlying Raspberry Pi header, the I2C lines are:
 
@@ -42,23 +42,21 @@ If you need to map that back to the underlying Raspberry Pi header, the I2C line
 
 If your breakout exposes Qwiic / STEMMA QT, it should plug into that PiMesh-1W `I2C / QT` port and still map to the same Pi I2C bus.
 
-For the tested `CJMCU-3935` board, the working I2C wiring is:
+For the tested board, the connector you actually use is the 4-pin I2C header with this layout:
 
-- `VCC` -> `3.3V`
+- `GND`
+- `+3V3`
+- `SDA_3V`
+- `SCL_3V`
+
+So the working wiring to the PiMesh-1W `I2C / QT` side is just:
+
 - `GND` -> `GND`
-- `SCL` -> `SCL`
-- `MOSI` -> `SDA`
-- `SI` -> `3.3V`
-- `CS` -> `GND`
-- `A0` -> `3.3V`
-- `A1` -> `3.3V`
-- `EN` -> `3.3V`
+- `+3V3` -> `3.3V`
+- `SDA_3V` -> `SDA`
+- `SCL_3V` -> `SCL`
 
-Pins not used by the current app:
-
-- `MISO`
-- `AO`
-- `IRQ`
+The lower-level AS3935 mode/address strapping is already handled on that tested board variant, so the app only needs the 4 I2C pins above.
 
 ## Repository Layout
 
