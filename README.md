@@ -19,7 +19,7 @@ This project is meant to run unattended on a Pi as a small field service:
 - send alerts to a MeshCore channel
 - install cleanly as a `systemd` service with `manage.sh`
 
-The intended deployment model is to run this on the same device as the MeshCore radio and connect back to that node through the MeshCore companion TCP feature on `0.0.0.0:5000`. The app is not limited to that layout, though. It will also work with any reachable MeshCore TCP node.
+The intended deployment model is to run this on the same device as the MeshCore radio and connect back to that node through the companion feature inside `pyMC` / [`pyMC_Repeater`](https://github.com/rightup/pyMC_Repeater) on `0.0.0.0:5000`. The app is not limited to that layout, though. It will also work with any reachable MeshCore TCP node.
 
 The MeshCore TCP send path and dynamic channel loading were verified against a live node. Hardware polling logic is implemented but still needs end-to-end validation on the final Pi plus sensor assembly.
 
@@ -91,6 +91,28 @@ i2cdetect -y 1
 ## Configuration
 
 Edit `config.toml`.
+
+### pyMC Companion Setup
+
+If you are using the intended self-hosted layout with `pyMC_Repeater`:
+
+1. Log into the `pyMC` web interface.
+2. Go to `Companions`.
+3. Create a new companion.
+4. Set the companion name.
+5. Set the companion TCP port. This project’s README examples assume `5000`.
+6. Save the companion.
+7. Use that companion IP and port in this app’s `config.toml`.
+
+On the same host, that will typically look like:
+
+```toml
+[meshcore]
+host = "127.0.0.1"
+port = 5000
+```
+
+If `pyMC` is on another device, use that device’s reachable IP address instead of `127.0.0.1`.
 
 Hashtag room example:
 
