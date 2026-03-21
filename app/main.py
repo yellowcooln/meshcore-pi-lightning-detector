@@ -33,6 +33,12 @@ def format_distance_text(config: AppConfig, event) -> str:
     return f"{distance_km} km"
 
 
+def format_time_text(config: AppConfig, now: datetime) -> str:
+    if config.alerts.time_format == "12h":
+        return now.strftime("%I:%M:%S %p")
+    return now.strftime("%H:%M:%S")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="AS3935 to MeshCore TCP alert bridge")
     parser.add_argument(
@@ -131,7 +137,7 @@ def format_alert_message(config: AppConfig, event) -> str:
                 energy=event.energy if event.energy is not None else "unknown",
                 interrupt_code=f"0x{event.interrupt_code:02X}",
                 kind=event.kind,
-                time=now.strftime("%H:%M:%S"),
+                time=format_time_text(config, now),
                 time24=now.strftime("%H:%M:%S"),
                 time12=now.strftime("%I:%M:%S %p"),
                 date=now.strftime("%Y-%m-%d"),

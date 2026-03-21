@@ -121,6 +121,49 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "alerts.distance_unit"):
                 load_config(config_path)
 
+    def test_time_format_defaults_to_24h(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    """
+                ).strip()
+            )
+            config = load_config(config_path)
+            self.assertEqual(config.alerts.time_format, "24h")
+
+    def test_time_format_must_be_12h_or_24h(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    time_format = "iso"
+                    """
+                ).strip()
+            )
+            with self.assertRaisesRegex(ValueError, "alerts.time_format"):
+                load_config(config_path)
+
 
 if __name__ == "__main__":
     unittest.main()

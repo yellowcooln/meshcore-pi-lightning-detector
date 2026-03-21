@@ -88,6 +88,7 @@ class AlertSettings:
     send_disturber_messages: bool
     message_prefix: str
     distance_unit: str
+    time_format: str
     lightning_message_template: str
 
 
@@ -161,6 +162,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
         send_disturber_messages=bool(alerts_raw.get("send_disturber_messages", False)),
         message_prefix=str(alerts_raw.get("message_prefix", "AS3935")).strip(),
         distance_unit=str(alerts_raw.get("distance_unit", "km")).strip().lower(),
+        time_format=str(alerts_raw.get("time_format", "24h")).strip().lower(),
         lightning_message_template=str(
             alerts_raw.get(
                 "lightning_message_template",
@@ -206,3 +208,5 @@ def _validate_config(
         raise ValueError("alerts.cooldown_seconds must be zero or greater")
     if alerts.distance_unit not in {"km", "mi"}:
         raise ValueError("alerts.distance_unit must be 'km' or 'mi'")
+    if alerts.time_format not in {"24h", "12h"}:
+        raise ValueError("alerts.time_format must be '24h' or '12h'")

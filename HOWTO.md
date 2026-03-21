@@ -147,7 +147,7 @@ If you want to change the outbound lightning message after install, run:
 sudo bash manage.sh setup
 ```
 
-That command gives you preset message styles first, lets you choose `km` or `mi` for `{distance}`, and only asks for a full template if you choose the custom option. The built-in presets include `lightning detected at {time} | distance={distance} | energy={energy}`, `lightning detected at {time}`, `lightning detected at {time12} on {date}`, and `lightning detected`. It then updates `config.toml`.
+That command gives you preset message styles first, lets you choose `km` or `mi` for `{distance}`, lets you choose `12h` or `24h` for `{time}`, and only asks for a full template if you choose the custom option. The built-in presets include `lightning detected at {time} | distance={distance} | energy={energy}`, `lightning detected at {time}`, `lightning detected at {time12} on {date}`, and `lightning detected`. It then updates `config.toml`.
 
 Available placeholders in the template are:
 
@@ -210,6 +210,7 @@ The installer writes `config.toml` for you. You usually only need to change the 
 - `send_disturber_messages`: When `true`, disturber events are also sent as channel messages.
 - `message_prefix`: Prefix added to outbound alert text.
 - `distance_unit`: Unit used when rendering `{distance}` in lightning message templates. Valid values are `km` and `mi`.
+- `time_format`: Format used when rendering `{time}` in lightning message templates. Valid values are `24h` and `12h`. Use `{time24}` or `{time12}` if you want to bypass this setting in a template.
 - `lightning_message_template`: Template for the actual lightning alert text. Supports `{prefix}`, `{distance}`, `{energy}`, `{interrupt_code}`, `{kind}`, `{time}`, `{time24}`, `{time12}`, and `{date}`. The current defaults do not include the prefix because the MeshCore sender name is already present on channel messages.
 
 ### `[logging]`

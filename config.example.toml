@@ -27,6 +27,7 @@ send_noise_messages = false
 send_disturber_messages = false
 message_prefix = "AS3935"
 distance_unit = "km"
+time_format = "24h"
 lightning_message_template = "lightning detected at {time} | distance={distance} | energy={energy}"
 
 [logging]

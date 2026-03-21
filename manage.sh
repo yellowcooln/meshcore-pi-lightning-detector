@@ -266,8 +266,10 @@ collect_alert_message_settings() {
 
   local default_lightning_template
   local default_distance_unit
+  local default_time_format
   default_lightning_template="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts lightning_message_template)"
   default_distance_unit="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts distance_unit)"
+  default_time_format="$(read_config_value_with_fallback "${source_path}" "${EXAMPLE_CONFIG_PATH}" alerts time_format)"
 
   info "Choose a lightning message style:"
   echo "    1) Keep current setting"
@@ -330,7 +332,32 @@ collect_alert_message_settings() {
       ;;
   esac
 
+  info "Choose a time format for {time}:"
+  echo "    1) Keep current setting (${default_time_format})"
+  echo "    2) 24-hour time (HH:MM:SS)"
+  echo "    3) 12-hour time (HH:MM:SS AM/PM)"
+
+  local time_choice
+  time_choice="$(prompt_choice_with_default "Select an option" "1")"
+
+  case "${time_choice}" in
+    1)
+      TIME_FORMAT="${default_time_format}"
+      ;;
+    2)
+      TIME_FORMAT="24h"
+      ;;
+    3)
+      TIME_FORMAT="12h"
+      ;;
+    *)
+      echo "Invalid time format choice: ${time_choice}" >&2
+      exit 1
+      ;;
+  esac
+
   info "Distance unit: ${DISTANCE_UNIT}"
+  info "Time format: ${TIME_FORMAT}"
   info "Lightning message template: ${LIGHTNING_MESSAGE_TEMPLATE}"
 }
 
@@ -407,6 +434,7 @@ lines = [
     f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
     f'message_prefix = {dump_string(data["alerts"]["message_prefix"])}',
     f'distance_unit = {dump_string(data["alerts"]["distance_unit"])}',
+    f'time_format = {dump_string(data["alerts"]["time_format"])}',
     f'lightning_message_template = {dump_string(data["alerts"]["lightning_message_template"])}',
     "",
     "[logging]",
@@ -425,6 +453,7 @@ write_alert_message_config() {
     CONFIG_PATH="${CONFIG_PATH}" \
     EXAMPLE_CONFIG_PATH="${EXAMPLE_CONFIG_PATH}" \
     DISTANCE_UNIT="${DISTANCE_UNIT}" \
+    TIME_FORMAT="${TIME_FORMAT}" \
     LIGHTNING_MESSAGE_TEMPLATE="${LIGHTNING_MESSAGE_TEMPLATE}" \
     "${PYTHON_BIN}" - <<'PY'
 import os
@@ -449,6 +478,7 @@ if source_path != example_path:
 
 data["alerts"]["lightning_message_template"] = os.environ["LIGHTNING_MESSAGE_TEMPLATE"]
 data["alerts"]["distance_unit"] = os.environ["DISTANCE_UNIT"]
+data["alerts"]["time_format"] = os.environ["TIME_FORMAT"]
 
 def dump_bool(value: bool) -> str:
     return "true" if value else "false"
@@ -487,6 +517,7 @@ lines = [
     f'send_disturber_messages = {dump_bool(data["alerts"]["send_disturber_messages"])}',
     f'message_prefix = {dump_string(data["alerts"]["message_prefix"])}',
     f'distance_unit = {dump_string(data["alerts"]["distance_unit"])}',
+    f'time_format = {dump_string(data["alerts"]["time_format"])}',
     f'lightning_message_template = {dump_string(data["alerts"]["lightning_message_template"])}',
     "",
     "[logging]",
@@ -527,9 +558,11 @@ if config_path.exists():
 template = data["alerts"]["lightning_message_template"]
 prefix = data["alerts"]["message_prefix"]
 distance_unit = str(data["alerts"].get("distance_unit", "km")).strip().lower()
+time_format = str(data["alerts"].get("time_format", "24h")).strip().lower()
 sample_date = datetime.now().astimezone().strftime("%Y-%m-%d")
 sample_time24 = datetime.now().astimezone().strftime("%H:%M:%S")
 sample_time12 = datetime.now().astimezone().strftime("%I:%M:%S %p")
+sample_time = sample_time12 if time_format == "12h" else sample_time24
 
 class SafeFormatDict(dict):
     def __missing__(self, key):
@@ -542,7 +575,7 @@ message = template.format_map(
         energy="12345",
         interrupt_code="0x08",
         kind="lightning",
-        time=sample_time24,
+        time=sample_time,
         time24=sample_time24,
         time12=sample_time12,
         date=sample_date,
