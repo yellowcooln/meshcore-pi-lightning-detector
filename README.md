@@ -59,6 +59,7 @@ That guide covers:
 - enabling Raspberry Pi I2C only if needed
 - creating the companion in `pyMC`
 - running `sudo bash manage.sh install`
+- running `sudo bash manage.sh upgrade` to pull updates and restart the service
 - running `sudo bash manage.sh setup` to change the lightning message template
 - verifying the channel with `sudo bash manage.sh test`
 - sending a live outbound message with `sudo bash manage.sh send`

@@ -22,6 +22,7 @@ Usage: ./manage.sh <command>
 
 Commands:
   install    Create/update venv, install app, install systemd service, enable service
+  upgrade    Pull latest git changes, refresh the app install, and restart the service
   setup      Reconfigure alert message settings in config.toml
   start      Start the systemd service; use "start logs" to tail logs immediately
   stop       Stop the systemd service
@@ -97,6 +98,23 @@ ensure_root_tools() {
     echo "This script requires sudo access." >&2
     exit 1
   }
+}
+
+ensure_git_repo_ready() {
+  need_cmd git
+  if ! run_as_owner git -C "${SCRIPT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "${SCRIPT_DIR} is not a git repository." >&2
+    exit 1
+  fi
+}
+
+ensure_clean_git_worktree() {
+  ensure_git_repo_ready
+  if [[ -n "$(run_as_owner git -C "${SCRIPT_DIR}" status --porcelain)" ]]; then
+    echo "Local git changes detected in ${SCRIPT_DIR}." >&2
+    echo "Commit, stash, or discard them before running upgrade." >&2
+    exit 1
+  fi
 }
 
 ensure_python_env() {
@@ -655,6 +673,41 @@ install_app() {
   echo "  2. Run: ./manage.sh start"
 }
 
+pull_latest_code() {
+  stage "Pulling latest repository changes"
+  ensure_clean_git_worktree
+
+  local current_branch upstream_branch
+  current_branch="$(run_as_owner git -C "${SCRIPT_DIR}" rev-parse --abbrev-ref HEAD)"
+  info "Using git branch ${current_branch}"
+
+  if upstream_branch="$(run_as_owner git -C "${SCRIPT_DIR}" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null)"; then
+    info "Pulling latest changes from ${upstream_branch}"
+    run_as_owner git -C "${SCRIPT_DIR}" pull --ff-only
+  else
+    info "Pulling latest changes from origin/${current_branch}"
+    run_as_owner git -C "${SCRIPT_DIR}" pull --ff-only origin "${current_branch}"
+  fi
+}
+
+upgrade_app() {
+  stage "Upgrading MeshCore Pi Lightning Detector"
+  repair_generated_ownership
+
+  if [[ ! -f "${CONFIG_PATH}" ]]; then
+    echo "Missing ${CONFIG_PATH}." >&2
+    echo "Run ./manage.sh install first." >&2
+    exit 1
+  fi
+
+  pull_latest_code
+  ensure_python_env
+  install_service_file
+  restart_service
+  echo
+  echo "Upgrade complete."
+}
+
 setup_alerts() {
   stage "Configuring alert message settings"
   repair_generated_ownership
@@ -773,6 +826,9 @@ main() {
       ;;
     install)
       install_app
+      ;;
+    upgrade)
+      upgrade_app
       ;;
     setup)
       setup_alerts

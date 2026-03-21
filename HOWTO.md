@@ -169,6 +169,7 @@ sudo bash manage.sh logs
 ## 8. Common Service Commands
 
 ```bash
+sudo bash manage.sh upgrade
 sudo bash manage.sh stop
 sudo bash manage.sh restart
 sudo bash manage.sh disable
@@ -260,6 +261,7 @@ Service and management commands:
 
 ```bash
 sudo bash manage.sh install
+sudo bash manage.sh upgrade
 sudo bash manage.sh setup
 sudo bash manage.sh start
 sudo bash manage.sh start logs
