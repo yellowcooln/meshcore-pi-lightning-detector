@@ -92,5 +92,5 @@ Instead it:
 
 - The script assumes a writable git clone of this repo.
 - `upgrade` refuses to run if the git worktree is dirty.
-- Optional interrupt support can use a GPIO such as PiMesh `AUX_17`; set `[sensor].irq_gpio = 17` in `config.toml`.
+- Optional interrupt support can use a GPIO such as PiMesh `AUX_17`, which maps to Raspberry Pi GPIO `17`; set `[sensor].irq_gpio = 17` in `config.toml`.
 - If the app says `Set sensor.i2c_address explicitly in config.toml.`, run `i2cdetect -y 1`, then set `[sensor].i2c_address` manually in `config.toml`.

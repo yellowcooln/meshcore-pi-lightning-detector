@@ -40,7 +40,7 @@ For the tested board, the current setup uses these 4 raw sensor pins for I2C:
 
 Optional interrupt wire:
 
-- sensor `IRQ` -> PiMesh `AUX_17`
+- sensor `IRQ` -> PiMesh `AUX_17` (Raspberry Pi GPIO `17`)
 
 If you wire `IRQ`, set this in `config.toml`:
 
@@ -49,7 +49,7 @@ If you wire `IRQ`, set this in `config.toml`:
 irq_gpio = 17
 ```
 
-If `irq_gpio` is blank, the app falls back to pure I2C polling.
+`irq_gpio` uses the Raspberry Pi GPIO number, so PiMesh `AUX_17` means Pi GPIO `17`. If `irq_gpio` is blank, the app falls back to pure I2C polling.
 
 ## 2. Clone The Repo
 
@@ -268,7 +268,7 @@ The installer writes `config.toml` for you. You usually only need to change the 
 
 - `i2c_bus`: Linux I2C bus number. On the PiMesh-1W this should be `1`.
 - `i2c_address`: AS3935 I2C address. Use `"auto"` to try the common AS3935 addresses automatically, or set an explicit value such as `"0x03"` if needed.
-- `irq_gpio`: Optional BCM GPIO number connected to the AS3935 `IRQ` pin. On the PiMesh AUX header, `AUX_17` maps to `17`. Leave blank to use polling only.
+- `irq_gpio`: Optional Raspberry Pi / BCM GPIO number connected to the AS3935 `IRQ` pin. On the PiMesh AUX header, `AUX_17` maps to Pi GPIO `17`, so use `irq_gpio = 17`. Leave blank to use polling only.
 - `indoor`: Sets the AS3935 indoor/outdoor front-end mode.
 - `noise_floor`: Noise threshold tuning. Higher values make the detector less sensitive to background noise.
 - `watchdog_threshold`: Event qualification threshold used by the AS3935.

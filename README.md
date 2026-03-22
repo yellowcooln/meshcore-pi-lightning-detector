@@ -63,9 +63,9 @@ For the tested board, the current setup uses these 4 raw sensor pins for I2C:
 
 Optional interrupt wire:
 
-- sensor `IRQ` -> PiMesh `AUX_17`
+- sensor `IRQ` -> PiMesh `AUX_17` (Raspberry Pi GPIO `17`)
 
-If you wire `IRQ`, set `sensor.irq_gpio = 17` in `config.toml` to enable GPIO interrupt handling. If `irq_gpio` is blank, the app falls back to pure I2C polling.
+If you wire `IRQ` to PiMesh `AUX_17`, set `sensor.irq_gpio = 17` in `config.toml` to enable GPIO interrupt handling. `irq_gpio` uses the Raspberry Pi GPIO number, so PiMesh `AUX_17` means Pi GPIO `17`. If `irq_gpio` is blank, the app falls back to pure I2C polling.
 
 ## Repository Layout
 
