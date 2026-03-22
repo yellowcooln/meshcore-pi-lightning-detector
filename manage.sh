@@ -9,11 +9,18 @@ CONFIG_PATH="${SCRIPT_DIR}/config.toml"
 EXAMPLE_CONFIG_PATH="${SCRIPT_DIR}/config.example.toml"
 RUN_USER="${SUDO_USER:-$USER}"
 RUN_GROUP="$(id -gn "${RUN_USER}")"
+SUPPLEMENTARY_GROUPS=()
 SUPPLEMENTARY_GROUPS_LINE=""
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 if getent group i2c >/dev/null 2>&1; then
-  SUPPLEMENTARY_GROUPS_LINE="SupplementaryGroups=i2c"
+  SUPPLEMENTARY_GROUPS+=("i2c")
+fi
+if getent group gpio >/dev/null 2>&1; then
+  SUPPLEMENTARY_GROUPS+=("gpio")
+fi
+if [[ "${#SUPPLEMENTARY_GROUPS[@]}" -gt 0 ]]; then
+  SUPPLEMENTARY_GROUPS_LINE="SupplementaryGroups=${SUPPLEMENTARY_GROUPS[*]}"
 fi
 
 usage() {
@@ -449,6 +456,7 @@ lines = [
     "[sensor]",
     f'i2c_bus = {data["sensor"]["i2c_bus"]}',
     f'i2c_address = {dump_string(data["sensor"]["i2c_address"])}',
+    f'irq_gpio = {dump_string(str(data["sensor"].get("irq_gpio", "")))}',
     f'indoor = {dump_bool(data["sensor"]["indoor"])}',
     f'noise_floor = {data["sensor"]["noise_floor"]}',
     f'watchdog_threshold = {data["sensor"]["watchdog_threshold"]}',
@@ -536,6 +544,7 @@ lines = [
     "[sensor]",
     f'i2c_bus = {data["sensor"]["i2c_bus"]}',
     f'i2c_address = {dump_string(data["sensor"]["i2c_address"])}',
+    f'irq_gpio = {dump_string(str(data["sensor"].get("irq_gpio", "")))}',
     f'indoor = {dump_bool(data["sensor"]["indoor"])}',
     f'noise_floor = {data["sensor"]["noise_floor"]}',
     f'watchdog_threshold = {data["sensor"]["watchdog_threshold"]}',

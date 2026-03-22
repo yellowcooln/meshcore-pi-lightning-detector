@@ -78,6 +78,49 @@ class ConfigTests(unittest.TestCase):
             config = load_config(config_path)
             self.assertIsNone(config.sensor.i2c_address)
 
+    def test_irq_gpio_defaults_to_none(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    """
+                ).strip()
+            )
+            config = load_config(config_path)
+            self.assertIsNone(config.sensor.irq_gpio)
+
+    def test_irq_gpio_can_be_set(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_path = Path(tmpdir) / "config.toml"
+            config_path.write_text(
+                textwrap.dedent(
+                    """
+                    [meshcore]
+                    channel_name = "#lightning"
+                    channel_key = ""
+
+                    [sensor]
+                    i2c_bus = 1
+                    irq_gpio = 17
+
+                    [alerts]
+                    cooldown_seconds = 0
+                    """
+                ).strip()
+            )
+            config = load_config(config_path)
+            self.assertEqual(config.sensor.irq_gpio, 17)
+
     def test_distance_unit_defaults_to_km(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "config.toml"

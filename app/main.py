@@ -10,6 +10,7 @@ from datetime import datetime
 
 from app.as3935 import AS3935
 from app.config import AppConfig, DEFAULT_CONFIG_PATH, load_config
+from app.gpio_interrupt import GPIOInterruptMonitor
 from app.meshcore_client import MeshCoreChannelClient
 
 
@@ -153,6 +154,7 @@ def format_alert_message(config: AppConfig, event) -> str:
 async def run_monitor(config: AppConfig) -> None:
     sensor = AS3935(config.sensor)
     client = MeshCoreChannelClient(config.meshcore)
+    interrupt_monitor: GPIOInterruptMonitor | None = None
     last_interrupt = 0
     last_lightning_alert_monotonic = 0.0
     should_stop = False
@@ -171,18 +173,42 @@ async def run_monitor(config: AppConfig) -> None:
     try:
         sensor.configure()
         logger.info("AS3935 configured at I2C address 0x%02X", sensor.address)
+        if config.sensor.irq_gpio is not None:
+            try:
+                interrupt_monitor = GPIOInterruptMonitor(config.sensor.irq_gpio)
+                interrupt_monitor.setup()
+                logger.info("Using GPIO %d for AS3935 IRQ interrupts", config.sensor.irq_gpio)
+            except RuntimeError as exc:
+                logger.warning(
+                    "Could not enable GPIO %d interrupt handling: %s. Falling back to polling.",
+                    config.sensor.irq_gpio,
+                    exc,
+                )
         await client.connect()
         logger.info("Sensor configured and MeshCore connection established")
 
         while not should_stop:
-            event = sensor.read_event()
-            if event is None:
-                last_interrupt = 0
-                await asyncio.sleep(config.sensor.poll_interval_seconds)
-                continue
+            if interrupt_monitor is not None:
+                await asyncio.to_thread(
+                    interrupt_monitor.wait_for_interrupt,
+                    config.sensor.poll_interval_seconds,
+                )
+                if should_stop:
+                    break
+                event = sensor.read_event()
+                if event is None:
+                    last_interrupt = 0
+                    continue
+            else:
+                event = sensor.read_event()
+                if event is None:
+                    last_interrupt = 0
+                    await asyncio.sleep(config.sensor.poll_interval_seconds)
+                    continue
 
             if event.interrupt_code == last_interrupt:
-                await asyncio.sleep(config.sensor.poll_interval_seconds)
+                if interrupt_monitor is None:
+                    await asyncio.sleep(config.sensor.poll_interval_seconds)
                 continue
 
             last_interrupt = event.interrupt_code
@@ -206,6 +232,8 @@ async def run_monitor(config: AppConfig) -> None:
 
             await asyncio.sleep(config.sensor.poll_interval_seconds)
     finally:
+        if interrupt_monitor is not None:
+            interrupt_monitor.close()
         sensor.close()
         await client.close()
 

@@ -54,14 +54,18 @@ If you need to map that back to the underlying Raspberry Pi header, the I2C line
 - `SCL`: pin `5` / `GPIO3`
 - `GND`: any Pi ground pin
 
-For the tested board, the current setup only uses these 4 raw sensor pins:
+For the tested board, the current setup uses these 4 raw sensor pins for I2C:
 
 - sensor `VCC` -> PiMesh `+3V3`
 - sensor `GND` -> PiMesh `GND`
 - sensor `MOSI` -> PiMesh `SDA_3V`
 - sensor `SCL` -> PiMesh `SCL_3V`
 
-That is the 4-wire I2C hookup for this board. The app does not use `AI`, `AO`, `EN-V`, `IRQ`, `SI`, `CS`, or `MISO` in this wiring.
+Optional interrupt wire:
+
+- sensor `IRQ` -> PiMesh `AUX_17`
+
+If you wire `IRQ`, set `sensor.irq_gpio = 17` in `config.toml` to enable GPIO interrupt handling. If `irq_gpio` is blank, the app falls back to pure I2C polling.
 
 ## Repository Layout
 

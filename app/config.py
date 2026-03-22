@@ -28,6 +28,14 @@ def _coerce_optional_i2c_address(value: Any, field_name: str) -> int | None:
     return _coerce_int(value, field_name)
 
 
+def _coerce_optional_int(value: Any, field_name: str) -> int | None:
+    if isinstance(value, str) and value.strip().lower() in {"", "none", "null"}:
+        return None
+    if value is None:
+        return None
+    return _coerce_int(value, field_name)
+
+
 def _coerce_float(value: Any, field_name: str) -> float:
     if isinstance(value, (int, float)):
         return float(value)
@@ -73,6 +81,7 @@ class MeshCoreSettings:
 class SensorSettings:
     i2c_bus: int
     i2c_address: int | None
+    irq_gpio: int | None
     indoor: bool
     noise_floor: int
     watchdog_threshold: int
@@ -138,6 +147,7 @@ def load_config(path: str | Path | None = None) -> AppConfig:
             sensor_raw.get("i2c_address", "auto"),
             "sensor.i2c_address",
         ),
+        irq_gpio=_coerce_optional_int(sensor_raw.get("irq_gpio", ""), "sensor.irq_gpio"),
         indoor=bool(sensor_raw.get("indoor", True)),
         noise_floor=_coerce_int(sensor_raw.get("noise_floor", 2), "sensor.noise_floor"),
         watchdog_threshold=_coerce_int(
@@ -198,6 +208,8 @@ def _validate_config(
         raise ValueError("sensor.i2c_bus must be zero or greater")
     if sensor.i2c_address is not None and (sensor.i2c_address < 0 or sensor.i2c_address > 0x7F):
         raise ValueError("sensor.i2c_address must be a 7-bit I2C address")
+    if sensor.irq_gpio is not None and sensor.irq_gpio < 0:
+        raise ValueError("sensor.irq_gpio must be zero or greater")
     if not 0 <= sensor.noise_floor <= 7:
         raise ValueError("sensor.noise_floor must be between 0 and 7")
     if not 0 <= sensor.watchdog_threshold <= 15:

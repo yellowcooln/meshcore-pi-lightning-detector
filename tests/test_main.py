@@ -19,6 +19,7 @@ class MainTests(unittest.TestCase):
             sensor=SensorSettings(
                 i2c_bus=1,
                 i2c_address=0x03,
+                irq_gpio=None,
                 indoor=True,
                 noise_floor=2,
                 watchdog_threshold=1,
@@ -71,6 +72,7 @@ class MainTests(unittest.TestCase):
             sensor=SensorSettings(
                 i2c_bus=1,
                 i2c_address=None,
+                irq_gpio=None,
                 indoor=True,
                 noise_floor=2,
                 watchdog_threshold=1,
@@ -120,6 +122,7 @@ class MainTests(unittest.TestCase):
             sensor=SensorSettings(
                 i2c_bus=1,
                 i2c_address=None,
+                irq_gpio=None,
                 indoor=True,
                 noise_floor=2,
                 watchdog_threshold=1,
@@ -171,6 +174,7 @@ class MainTests(unittest.TestCase):
             sensor=SensorSettings(
                 i2c_bus=1,
                 i2c_address=None,
+                irq_gpio=None,
                 indoor=True,
                 noise_floor=2,
                 watchdog_threshold=1,
@@ -220,6 +224,7 @@ class MainTests(unittest.TestCase):
             sensor=SensorSettings(
                 i2c_bus=1,
                 i2c_address=None,
+                irq_gpio=None,
                 indoor=True,
                 noise_floor=2,
                 watchdog_threshold=1,
