@@ -66,10 +66,15 @@ class MeshCoreChannelClient:
                     msg=text,
                     timestamp=int(time.time()),
                 )
-                if result is None:
-                    raise RuntimeError("MeshCore send returned no response")
-                if result.type == EventType.ERROR:
-                    raise RuntimeError(f"MeshCore send failed: {result.payload}")
+                self._raise_for_unexpected_result(
+                    result,
+                    no_response_message="MeshCore send returned no response",
+                    error_prefix="MeshCore send failed",
+                    ambiguous_warning=(
+                        "MeshCore did not confirm the channel message for %s. "
+                        "The message may still have been delivered, so the app will not retry."
+                    ),
+                )
                 logger.info("Sent channel message to %s", self.target.name)
                 return
             except Exception as exc:
@@ -92,10 +97,15 @@ class MeshCoreChannelClient:
                         msg=probe_message,
                         timestamp=int(time.time()),
                     )
-                    if result is None:
-                        raise RuntimeError("MeshCore verify send returned no response")
-                    if result.type == EventType.ERROR:
-                        raise RuntimeError(f"MeshCore verify send failed: {result.payload}")
+                    self._raise_for_unexpected_result(
+                        result,
+                        no_response_message="MeshCore verify send returned no response",
+                        error_prefix="MeshCore verify send failed",
+                        ambiguous_warning=(
+                            "MeshCore did not confirm the verification probe for %s. "
+                            "The probe may still have been delivered, so the app will not retry."
+                        ),
+                    )
                 return
             except Exception as exc:
                 last_error = exc
@@ -124,3 +134,27 @@ class MeshCoreChannelClient:
         if result.type == EventType.ERROR:
             raise RuntimeError(f"MeshCore set_channel failed: {result.payload}")
         self._channel_loaded = True
+
+    def _raise_for_unexpected_result(
+        self,
+        result,
+        *,
+        no_response_message: str,
+        error_prefix: str,
+        ambiguous_warning: str,
+    ) -> None:
+        if result is None:
+            raise RuntimeError(no_response_message)
+        if self._is_unconfirmed_success(result):
+            logger.warning(ambiguous_warning, self.target.name)
+            return
+        if result.type == EventType.ERROR:
+            raise RuntimeError(f"{error_prefix}: {result.payload}")
+
+    @staticmethod
+    def _is_unconfirmed_success(result) -> bool:
+        if result.type != EventType.ERROR:
+            return False
+        if not isinstance(result.payload, dict):
+            return False
+        return result.payload.get("reason") == "no_event_received"
