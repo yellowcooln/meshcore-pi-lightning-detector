@@ -36,22 +36,26 @@ class MeshCoreClientTests(unittest.IsolatedAsyncioTestCase):
             Event(EventType.ERROR, {"reason": "no_event_received"})
         )
 
-        with self.assertLogs("app.meshcore_client", level="WARNING") as logs:
+        with self.assertLogs("app.meshcore_client", level="INFO") as logs:
             await client.send_message("test")
 
         self.assertEqual(send_chan_msg.await_count, 1)
-        self.assertIn("may still have been delivered", "\n".join(logs.output))
+        output = "\n".join(logs.output)
+        self.assertIn("may still have been delivered", output)
+        self.assertIn("Submitted channel message to #lightning without confirmation", output)
 
     async def test_verify_channel_does_not_retry_when_probe_delivery_is_unconfirmed(self) -> None:
         client, send_chan_msg = make_client_with_send_result(
             Event(EventType.ERROR, {"reason": "no_event_received"})
         )
 
-        with self.assertLogs("app.meshcore_client", level="WARNING") as logs:
+        with self.assertLogs("app.meshcore_client", level="INFO") as logs:
             await client.verify_channel(probe_message="probe")
 
         self.assertEqual(send_chan_msg.await_count, 1)
-        self.assertIn("probe may still have been delivered", "\n".join(logs.output))
+        output = "\n".join(logs.output)
+        self.assertIn("probe may still have been delivered", output)
+        self.assertIn("Submitted verification probe to #lightning without confirmation", output)
 
     async def test_send_message_still_raises_for_real_errors(self) -> None:
         client, send_chan_msg = make_client_with_send_result(

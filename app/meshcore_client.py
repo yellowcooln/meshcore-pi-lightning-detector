@@ -66,7 +66,7 @@ class MeshCoreChannelClient:
                     msg=text,
                     timestamp=int(time.time()),
                 )
-                self._raise_for_unexpected_result(
+                confirmed = self._raise_for_unexpected_result(
                     result,
                     no_response_message="MeshCore send returned no response",
                     error_prefix="MeshCore send failed",
@@ -75,7 +75,13 @@ class MeshCoreChannelClient:
                         "The message may still have been delivered, so the app will not retry."
                     ),
                 )
-                logger.info("Sent channel message to %s", self.target.name)
+                if confirmed:
+                    logger.info("Sent channel message to %s", self.target.name)
+                else:
+                    logger.info(
+                        "Submitted channel message to %s without confirmation",
+                        self.target.name,
+                    )
                 return
             except Exception as exc:
                 last_error = exc
@@ -97,7 +103,7 @@ class MeshCoreChannelClient:
                         msg=probe_message,
                         timestamp=int(time.time()),
                     )
-                    self._raise_for_unexpected_result(
+                    confirmed = self._raise_for_unexpected_result(
                         result,
                         no_response_message="MeshCore verify send returned no response",
                         error_prefix="MeshCore verify send failed",
@@ -106,6 +112,13 @@ class MeshCoreChannelClient:
                             "The probe may still have been delivered, so the app will not retry."
                         ),
                     )
+                    if confirmed:
+                        logger.info("Sent verification probe to %s", self.target.name)
+                    else:
+                        logger.info(
+                            "Submitted verification probe to %s without confirmation",
+                            self.target.name,
+                        )
                 return
             except Exception as exc:
                 last_error = exc
@@ -142,14 +155,15 @@ class MeshCoreChannelClient:
         no_response_message: str,
         error_prefix: str,
         ambiguous_warning: str,
-    ) -> None:
+    ) -> bool:
         if result is None:
             raise RuntimeError(no_response_message)
         if self._is_unconfirmed_success(result):
             logger.warning(ambiguous_warning, self.target.name)
-            return
+            return False
         if result.type == EventType.ERROR:
             raise RuntimeError(f"{error_prefix}: {result.payload}")
+        return True
 
     @staticmethod
     def _is_unconfirmed_success(result) -> bool:
